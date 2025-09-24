@@ -1,2 +1,15 @@
-# Social-group-simulator
-A Java Swing campus bulletin board where users post events, study groups, lost &amp; found, and announcements. Feed supports filters, tags, search, comments, reactions, and undo/redo. MVC with Observer/Strategy/Factory/Command/DAO. Local SQLite; optional Java server for multi-user sync and moderation.
+# Social Group Simulator
+
+Java Swing desktop application simulating a campus bulletin board.
+
+## Features (MVP)
+- Create and view posts (events, study groups, lost & found)
+- Filter and sort posts
+- Comments and reactions
+- Undo/redo using Command pattern
+- Observer/EventBus for updates
+
+## Build & Run
+```
+./gradlew run
+```
