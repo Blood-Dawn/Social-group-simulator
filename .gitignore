@@ -1,0 +1,17 @@
+# Gradle files
+/.gradle/
+/build/
+
+# IDE/editor
+/.idea/
+*.iml
+.vscode/
+/.settings/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Java compiles + logs
+*.class
+*.log
