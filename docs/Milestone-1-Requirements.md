@@ -7,8 +7,7 @@
 
 **Project Title**: Campus Board - Social Group Simulator  
 **Platform**: Java Desktop Application with Swing GUI  
-**Team Members**: [TO BE FILLED BY TEAM]  
-**Group ID**: [TO BE ASSIGNED]  
+**Team Members**: [Deo Cherisme, Kheiven D'Haiti, Andrew Lopez, Zachary Muirhead]  
 **Submission Date**: October 1, 2025  
 
 ---
@@ -97,20 +96,20 @@ Campus Board is a digital bulletin board application designed specifically for c
 **Goal**: Share information with campus community  
 **Precondition**: Student is logged into the system  
 **Main Success Scenario**:
-1. Student clicks "Create Post" button
+1. Student clicks the "Create Post" button
 2. System displays post creation dialog
 3. Student enters post title
 4. Student enters post content
 5. Student selects appropriate category
 6. Student clicks "Submit"
 7. System validates input
-8. System saves post to database
-9. System displays success message
-10. System updates main feed with new post
+8. System saves the post to the database
+9. System displays a success message
+10. System updates the main feed with a new post
 
 **Extensions**:
-- 7a. Validation fails: System displays error message and returns to step 3
-- 8a. Save fails: System displays error message and allows retry
+- 7a. Validation fails: System displays an error message and returns to step 3
+- 8a. Save fails: System displays an error message and allows retry
 
 ### **UC2: User Views Feed**
 **Actor**: Any authenticated user  
@@ -126,7 +125,7 @@ Campus Board is a digital bulletin board application designed specifically for c
 
 ### **UC3: User Filters by Category**
 **Actor**: Any authenticated user  
-**Goal**: View posts from specific category  
+**Goal**: View posts from a specific category  
 **Precondition**: User is viewing main feed  
 **Main Success Scenario**:
 1. User clicks category in sidebar
@@ -140,8 +139,8 @@ Campus Board is a digital bulletin board application designed specifically for c
 **Goal**: Find specific content  
 **Precondition**: User is logged into the system  
 **Main Success Scenario**:
-1. User enters search terms in search box
-2. User presses Enter or clicks search button
+1. User enters search terms in the search box
+2. User presses Enter or clicks the search button
 3. System searches post titles and content
 4. System displays matching results
 5. System highlights search terms in results
@@ -153,18 +152,18 @@ Campus Board is a digital bulletin board application designed specifically for c
 **Precondition**: User is viewing a post  
 **Main Success Scenario**:
 1. User clicks "Like" button on post
-2. System checks if user has already voted
-3. System records like in database
-4. System updates like count display
-5. System disables like button for this user
-6. System publishes like event
+2. System checks if the user has already voted
+3. System records are like in a database
+4. System updates, like the count display
+5. System disables the like button for this user
+6. System publishes a like event
 
 ### **UC6: Faculty Posts Announcement**
 **Actor**: Faculty member  
 **Goal**: Share official course or academic information  
 **Precondition**: Faculty member is logged into the system  
 **Main Success Scenario**:
-1. Faculty member clicks "Create Post" button
+1. Faculty member clicks the "Create Post" button
 2. System displays post creation dialog
 3. Faculty member enters announcement title
 4. Faculty member enters announcement content
@@ -172,7 +171,7 @@ Campus Board is a digital bulletin board application designed specifically for c
 6. System automatically marks post as "Official"
 7. Faculty member clicks "Submit"
 8. System validates input and faculty privileges
-9. System saves announcement to database
+9. System saves announcement to the database
 10. System promotes post to featured content
 11. System sends notifications to relevant users
 
@@ -181,7 +180,7 @@ Campus Board is a digital bulletin board application designed specifically for c
 **Goal**: Announce upcoming club event  
 **Precondition**: Club representative is logged into the system  
 **Main Success Scenario**:
-1. Club representative clicks "Create Post" button
+1. Club representative clicks the "Create Post" button
 2. System displays post creation dialog
 3. Representative enters event title
 4. Representative enters event details (date, time, location)
@@ -189,7 +188,7 @@ Campus Board is a digital bulletin board application designed specifically for c
 6. Representative adds club affiliation
 7. Representative clicks "Submit"
 8. System validates input
-9. System saves event post to database
+9. System saves event post to the database
 10. System adds event to campus calendar integration
 
 ### **UC8: User Deletes Own Post**
@@ -197,10 +196,10 @@ Campus Board is a digital bulletin board application designed specifically for c
 **Goal**: Remove previously created post  
 **Precondition**: User is viewing their own post  
 **Main Success Scenario**:
-1. User clicks "Delete" button on their post
+1. User clicks the "Delete" button on their post
 2. System displays confirmation dialog
 3. User confirms deletion
-4. System removes post from database
+4. System removes post from the database
 5. System updates feed display
 6. System publishes post deletion event
 
@@ -218,10 +217,10 @@ Campus Board is a digital bulletin board application designed specifically for c
 **User Type**: Classification of users (Student, Faculty, Staff, Club, etc.)  
 **Featured Content**: Posts promoted by the system for increased visibility  
 **Trending**: Posts with high engagement levels  
-**Filter**: Mechanism to display subset of posts based on criteria  
+**Filter**: Mechanism to display a subset of posts based on criteria  
 **Search**: Text-based content discovery functionality  
 **Event**: Time-specific announcements (meetings, activities, deadlines)  
-**Club/Organization**: Groups that can post collectively under group identity  
+**Club/Organization**: Groups that can post collectively under a group identity  
 **Engagement**: User interactions with posts (likes, views, responses)  
 **Moderation**: Administrative control over content and users  
 
@@ -247,7 +246,7 @@ Campus Board is a digital bulletin board application designed specifically for c
 - Cloud-based deployment
 
 ### **Technical Constraints**
-- Must use Java with Swing GUI framework
+- Must use Java with the Swing GUI framework
 - Local data storage (in-memory with file persistence)
 - Single-machine deployment
 - Desktop operating system compatibility
@@ -266,13 +265,13 @@ Campus Board is a digital bulletin board application designed specifically for c
 - Users can create, view, edit, and delete posts
 - Effective categorization and filtering system
 - Search functionality finds relevant content
-- Like/dislike system works accurately
+- The like/dislike system works accurately
 - Multiple user types operate with appropriate privileges
 
 ### **Technical Success**
 - Stable desktop application with professional UI
 - Proper MVC architecture implementation
-- At least 5 design patterns effectively utilized
+- At least five design patterns are effectively utilized
 - Comprehensive unit test coverage
 - Complete JavaDoc documentation
 
@@ -281,9 +280,3 @@ Campus Board is a digital bulletin board application designed specifically for c
 - Showcases software engineering best practices
 - Suitable for professional portfolio presentation
 - Meets all course requirements and deadlines
-
----
-
-**Document Status**: Requirements Specification Complete  
-**Next Phase**: Design Specification (UML Diagrams)  
-**Review Date**: [TO BE SCHEDULED WITH INSTRUCTOR]
