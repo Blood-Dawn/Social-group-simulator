@@ -1,6 +1,6 @@
-package edu.fau.sgs.filter;
+package org.campusboard.sgs.filter;
 
-import edu.fau.sgs.model.Post;
+import org.campusboard.sgs.model.Post;
 import java.util.List;
 
 public interface FilterStrategy {

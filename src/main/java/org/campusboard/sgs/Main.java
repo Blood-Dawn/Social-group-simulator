@@ -1,4 +1,4 @@
-package edu.fau.sgs;
+package org.campusboard.sgs;
 
 import javax.swing.*;
 

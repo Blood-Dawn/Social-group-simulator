@@ -1,4 +1,4 @@
-package edu.fau.sgs.model;
+package org.campusboard.sgs.model;
 
 public class Post {
     private String title;

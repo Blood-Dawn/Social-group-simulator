@@ -1,4 +1,4 @@
-package edu.fau.sgs.controller;
+package org.campusboard.sgs.controller;
 
 public interface Command {
     void execute();
