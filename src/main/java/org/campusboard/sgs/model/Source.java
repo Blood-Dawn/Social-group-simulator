@@ -1,20 +1,26 @@
 package org.campusboard.sgs.model;
 
+/**
+ * Represents the source or category of content in the social group simulator.
+ * Organized into logical groupings to reduce redundancy.
+ */
 public enum Source {
+    // Content Publishers
     OFFICIAL,
     CLUB,
     USER,
-    OTHER,
-    SYSTEM_UPDATE,
-    SYSTEM_ALERT,
+    
+    // System Generated
+    SYSTEM,
     SPONSORED,
     RECOMMENDED,
     TRENDING,
     FEATURED,
+    
+    // Content Types
     ANNOUNCEMENT,
     EVENT,
     ALERT,
-    UPDATE,
     NEWS,
     PROMOTION,
     SURVEY,
@@ -22,16 +28,18 @@ public enum Source {
     TIP,
     REMINDER,
     INVITATION,
+    
+    // Gamification
     ACHIEVEMENT,
     BADGE,
     CHALLENGE,
-    GOAL,
     MILESTONE,
+    
+    // Social Interactions
     NOTIFICATION,
     MESSAGE,
-    COMMENT,
-    LIKE,
-    SHARE,
-    FOLLOW,
-    UNFOLLOW
+    SOCIAL_ACTION, // covers COMMENT, LIKE, SHARE, FOLLOW, UNFOLLOW
+    
+    // Fallback
+    OTHER
 }
