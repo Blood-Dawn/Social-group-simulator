@@ -43,7 +43,7 @@ This project uses a **Framework + Implementation** approach:
 - **Build**: Gradle
 
 ### Project Structure
-```
+```bash
 src/main/java/org/campusboard/sgs/
 ├── Main.java                    # Application entry point
 ├── controller/                  # Business logic layer
