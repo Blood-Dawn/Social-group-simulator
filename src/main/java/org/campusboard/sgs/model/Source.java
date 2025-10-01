@@ -1,5 +1,37 @@
 package org.campusboard.sgs.model;
 
-public class Source {
-    
+public enum Source {
+    OFFICIAL,
+    CLUB,
+    USER,
+    OTHER,
+    SYSTEM_UPDATE,
+    SYSTEM_ALERT,
+    SPONSORED,
+    RECOMMENDED,
+    TRENDING,
+    FEATURED,
+    ANNOUNCEMENT,
+    EVENT,
+    ALERT,
+    UPDATE,
+    NEWS,
+    PROMOTION,
+    SURVEY,
+    FEEDBACK,
+    TIP,
+    REMINDER,
+    INVITATION,
+    ACHIEVEMENT,
+    BADGE,
+    CHALLENGE,
+    GOAL,
+    MILESTONE,
+    NOTIFICATION,
+    MESSAGE,
+    COMMENT,
+    LIKE,
+    SHARE,
+    FOLLOW,
+    UNFOLLOW
 }
