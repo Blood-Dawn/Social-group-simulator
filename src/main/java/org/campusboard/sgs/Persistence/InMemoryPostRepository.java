@@ -31,8 +31,11 @@ public class InMemoryPostRepository implements PostRepository {
 
     @Override
     public Post update(Post post) {
-        posts.put(post.getId(), post);
-        return post;
+        if (posts.containsKey(post.getId())) {
+            posts.put(post.getId(), post);
+            return post;
+        }
+        return null; // Post doesn't exist
     }
 
     @Override
@@ -51,10 +54,5 @@ public class InMemoryPostRepository implements PostRepository {
             post.setDislikes(post.getDislikes() + 1);
         }
         return post;
-    }
-
-    @Override
-    public Post deletePost(UUID id) {
-        return posts.remove(id);
     }
 }

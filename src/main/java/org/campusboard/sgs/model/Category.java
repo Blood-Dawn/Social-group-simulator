@@ -1,63 +1,68 @@
 package org.campusboard.sgs.model;
 
-/** Categories for posts */
+/** 
+ * Categories for posts - consolidated with source information
+ * Combines content type, origin, and subject matter
+ */
 public enum Category {
-    EVENTS,
-    STUDY_GROUPS,
-    LOST_FOUND,
-    ANNOUNCEMENTS,
-    GENERAL,
-    OFF_TOPIC,
+    // Campus Essentials & Official Content
+    ANNOUNCEMENTS,        // Official announcements (was Source.OFFICIAL + Category.ANNOUNCEMENTS)
+    EVENTS,              // Campus events
+    ACADEMICS,           // Academic content
+    CAMPUS_LIFE,         // General campus life
+    
+    // System Generated Content
+    FEATURED,            // Featured/promoted content (was Source.FEATURED)
+    TRENDING,            // Trending posts (was Source.TRENDING)
+    RECOMMENDED,         // Algorithm recommended (was Source.RECOMMENDED)
+    
+    // Student Services
     HOUSING,
     JOBS_INTERNSHIPS,
     BUY_SELL,
-    VOLUNTEERING,
-    CLUBS_ORGS,
-    SPORTS_FITNESS,
-    FOOD_DRINKS,
+    LOST_FOUND,
     TRAVEL_TRANSPORTATION,
-    OTHER,
-    ACADEMICS,
-    CAMPUS_LIFE,
-    TECHNOLOGY,
-    ARTS_ENTERTAINMENT,
-    HEALTH_WELLNESS,
-    NEWS_POLITICS,
-    HUMOR_MEMES,
-    CAREER_DEVELOPMENT,
+    
+    // Social & Activities
+    CLUBS_ORGS,          // Club/organization content (was Source.CLUB)
+    STUDY_GROUPS,
+    SPORTS_FITNESS,
     SOCIAL_EVENTS,
-    CULTURE_DIVERSITY,
-    ENVIRONMENT_SUSTAINABILITY,
-    RELIGION_SPIRITUALITY,
-    FAMILY_PARENTING,
+    VOLUNTEERING,
+    
+    // Lifestyle & Interests
+    ARTS_ENTERTAINMENT,  // covers music, cinema, theater, dance, photography
+    TECHNOLOGY,
+    HEALTH_WELLNESS,
+    FOOD_DRINKS,
     GAMING,
-    FASHION_BEAUTY,
-    PHILOSOPHY,
-    PSYCHOLOGY,
-    LITERATURE,
-    MUSIC,
-    CINEMA,
-    THEATER,
-    DANCE,
-    POETRY,
-    PHOTOGRAPHY,
-    TRIVIA,
-    PUZZLES,
-    BOARD_GAMES,
-    COMICS,
-    ANIME_MANGA,
-    DIY_CRAFTS,
-    GARDENING,
-    COOKING_BAKING,
-    PETS_ANIMALS,
-    ASTRONOMY,
-    HISTORY,
-    GEOGRAPHY,
-    LINGUISTICS,
-    ECONOMICS,
-    LAW,
-    MEDICINE,
-    ENGINEERING,
-    MATHEMATICS,
-    PHYSICS,
+    
+    // Academic Subjects
+    STEM,               // covers mathematics, physics, engineering, medicine
+    HUMANITIES,         // covers literature, philosophy, history, linguistics
+    SOCIAL_SCIENCES,    // covers psychology, economics, law, geography
+    
+    // Social Interactions (was Source social actions)
+    NOTIFICATIONS,      // System notifications
+    MESSAGES,           // Direct messages
+    SOCIAL_ACTIVITY,    // Likes, shares, follows, etc.
+    
+    // Content Types (was Source content types)
+    SURVEYS,
+    FEEDBACK,
+    TIPS,
+    REMINDERS,
+    INVITATIONS,
+    
+    // Gamification (was Source gamification)
+    ACHIEVEMENTS,
+    BADGES,
+    CHALLENGES,
+    MILESTONES,
+    
+    // General
+    GENERAL,
+    HUMOR_MEMES,
+    OFF_TOPIC,
+    OTHER
 }
