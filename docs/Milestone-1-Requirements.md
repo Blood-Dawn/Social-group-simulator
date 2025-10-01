@@ -1,5 +1,4 @@
-# Milestone 1: Application Requirements
-**Campus Board - Social Group Simulator**
+# Milestone 1: **Campus Board - Social Group Simulator**
 
 ---
 
