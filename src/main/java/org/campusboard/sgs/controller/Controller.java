@@ -14,12 +14,14 @@ public class Controller {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private User currentUser;
+    private final User guestUser;
     private Category activeFilter;
     private String searchQuery = "";
 
     public Controller(PostRepository postRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.guestUser = initializeGuestUser();
     }
     
     // ============ POST MANAGEMENT ============
@@ -36,10 +38,7 @@ public class Controller {
             throw new IllegalArgumentException("Body cannot be empty");
         }
 
-        Post post = new Post(title.trim(), body.trim(), category == null ? Category.GENERAL : category);
-        if (currentUser != null) {
-            post.setAuthor(currentUser.getUsername());
-        }
+        Post post = new Post(title.trim(), body.trim(), category, resolveAuthor());
 
         postRepository.save(post);
         EventBus.publish(AppEvent.POST_CREATED, post);
@@ -157,6 +156,16 @@ public class Controller {
             currentUser = null;
             EventBus.publish(AppEvent.USER_LOGGED_OUT);
         }
+    }
+
+    private User initializeGuestUser() {
+        return userRepository.findByUsername("guest")
+                .orElseGet(() -> userRepository.save(
+                        new User("guest", "guest@campusboard.local", "Guest", UserType.GUEST)));
+    }
+
+    private User resolveAuthor() {
+        return currentUser != null ? currentUser : guestUser;
     }
 
     public void performSearch(String query) {
