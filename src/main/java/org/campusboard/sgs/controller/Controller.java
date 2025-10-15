@@ -160,7 +160,7 @@ public class Controller {
     }
 
     public void performSearch(String query) {
-        searchQuery = query == null ? "" : query.trim();
+    searchQuery = query == null ? "" : query.trim().toLowerCase();
         EventBus.publish(AppEvent.SEARCH_REQUESTED, searchQuery);
         EventBus.publish(AppEvent.POSTS_CHANGED);
     }
