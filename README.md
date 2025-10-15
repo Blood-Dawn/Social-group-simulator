@@ -92,6 +92,18 @@ src/main/java/org/campusboard/sgs/
 
 Currently shows a "Coming Soon" window until implementation is complete.
 
+### Demo Login Credentials
+The in-memory seed data provides the following accounts for local testing:
+
+| Username | Password  | Role   |
+|----------|-----------|--------|
+| `admin`  | `admin123`  | Staff/Admin controls |
+| `staff`  | `staff123`  | Staff |
+| `student`| `student123`| Student |
+| `guest`  | `guest123`  | Guest |
+
+> When remote mode is enabled, ensure the remote service is seeded with matching credentials or update this table accordingly.
+
 ## 📋 Implementation Status
 
 ### ✅ Complete (Framework)

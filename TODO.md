@@ -5,7 +5,32 @@
 ## 🎯 **Application Overview**
 A campus social platform where students, staff, clubs, and organizations can post announcements, events, discussions, and more. Think of it as a digital bulletin board for college campuses.
 
-## 🚧 **High Priority - Core Functionality**
+## � **Demo Login Credentials**
+Keep these handy for local testing with the in-memory repositories:
+
+| Username | Password  | Role                |
+|----------|-----------|--------------------|
+| `admin`  | `admin123`  | Staff/Admin controls |
+| `staff`  | `staff123`  | Staff              |
+| `student`| `student123`| Student            |
+| `guest`  | `guest123`  | Guest              |
+
+> If remote mode is enabled, align the backing service credentials with this table.
+
+## 🧰 **Get It Done – Post-Launch Troubleshooting**
+Rapid follow-ups from the latest run-through. Assign and knock these out before the next demo:
+
+- [ ] Restrict post deletion to admin-level accounts; other roles should not see the delete affordance.
+- [ ] Align staff capabilities with students (no elevated privileges beyond current student feature set).
+- [ ] Only admin users should see admin tools in the sidebar panel; hide these controls for all other roles.
+- [ ] Introduce unique UI themes or layouts per user role for clearer differentiation.
+- [ ] Preserve the feed scroll position when a post is liked so the view does not jump to the top.
+- [ ] Enforce single-like interactions: first tap likes, second tap removes the like, and block duplicate reactions.
+- [ ] Add a companion dislike button with proper toggling behavior and corresponding event wiring.
+- [ ] Replace placeholder filter and sidebar icons with finalized artwork assets.
+- [ ] Update the top-left "F" logo to render inside a circular badge instead of the current square for a sleeker look.
+
+## �🚧 **High Priority - Core Functionality**
 
 ### Data Layer (Repository Implementations)
 > *Roadmap Alignment*: Milestone **Authentication Foundation**
