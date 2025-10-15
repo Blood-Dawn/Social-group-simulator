@@ -145,8 +145,13 @@ public class Controller {
         return currentUser;
     }
 
+    public UserType getCurrentUserType() {
+        return currentUser == null ? UserType.GUEST : currentUser.getUserType();
+    }
+
     public void setCurrentUser(User user) {
         this.currentUser = user;
+        EventBus.publish(AppEvent.USER_ROLE_CHANGED, getCurrentUserType());
         if (user != null) {
             EventBus.publish(AppEvent.USER_LOGGED_IN, user);
         }
@@ -154,7 +159,7 @@ public class Controller {
 
     public void logout() {
         if (currentUser != null) {
-            currentUser = null;
+            setCurrentUser(null);
             EventBus.publish(AppEvent.USER_LOGGED_OUT);
         }
     }
