@@ -1,11 +1,14 @@
 # Campus Board - TODO Framework
 
+> **Roadmap Note**: For milestone status, owners, and scheduling, refer to [docs/Roadmap.md](docs/Roadmap.md). This file tracks the actionable engineering work items linked from the roadmap.
+
 ## 🎯 **Application Overview**
 A campus social platform where students, staff, clubs, and organizations can post announcements, events, discussions, and more. Think of it as a digital bulletin board for college campuses.
 
 ## 🚧 **High Priority - Core Functionality**
 
 ### Data Layer (Repository Implementations)
+> *Roadmap Alignment*: Milestone **Authentication Foundation**
 - [ ] **TODO: Complete InMemoryUserRepository.java**
   - Implement all methods using the `users` ConcurrentHashMap
   - Add proper validation and error handling
@@ -17,12 +20,14 @@ A campus social platform where students, staff, clubs, and organizations can pos
   - Location: `src/main/java/org/campusboard/sgs/model/Post.java`
 
 ### Controller Layer (Business Logic)
+> *Roadmap Alignment*: Milestone **Authentication Foundation**
 - [ ] **TODO: Complete Controller.java methods**
   - All methods have signatures and TODO comments
   - Implement validation, repository calls, event publishing
   - Location: `src/main/java/org/campusboard/sgs/controller/Controller.java`
 
 ### View Layer (UI Implementation) - ✅ **COMPLETED BY DEO (10/14/2025)**
+> *Roadmap Alignment*: Milestone **Multi-user UI & Admin Experience**
 
 - [x] **✅ DONE: Complete MainWindow.java**
   - ✅ Layout implementation complete with BorderLayout
@@ -76,6 +81,7 @@ A campus social platform where students, staff, clubs, and organizations can pos
   - Location: `src/main/java/org/campusboard/sgs/view/dialogs/CreatePostDialog.java`
 
 ### Main Application Wiring
+> *Roadmap Alignment*: Milestone **Multi-user UI & Admin Experience**
 - [ ] **TODO: Complete Main.java**
   - Wire up all components with dependency injection
   - Initialize repositories and controllers
@@ -84,12 +90,14 @@ A campus social platform where students, staff, clubs, and organizations can pos
 ## 🔧 **Medium Priority - Enhancements**
 
 ### Authentication System
+> *Roadmap Alignment*: Milestone **Authentication Foundation**
 - [ ] **TODO: Create LoginDialog.java**
   - Username/password form
   - Integration with UserRepository
   - Location: `src/main/java/org/campusboard/sgs/view/dialogs/LoginDialog.java`
 
 ### Search & Filter Enhancements
+> *Roadmap Alignment*: Milestone **Multi-user UI & Admin Experience** and feeds into **Real-time Sync & Notifications**
 - [ ] **TODO: Create SearchService.java**
   - Advanced search functionality
   - Search by title, body, author, category
@@ -102,6 +110,7 @@ A campus social platform where students, staff, clubs, and organizations can pos
   - Location: `src/main/java/org/campusboard/sgs/filter/`
 
 ### Command Pattern for Undo/Redo
+> *Roadmap Alignment*: Milestone **Multi-user UI & Admin Experience**
 - [ ] **TODO: Create Post Commands**
   - `CreatePostCommand.java` - implements Command interface
   - `DeletePostCommand.java` - implements Command interface
@@ -111,6 +120,7 @@ A campus social platform where students, staff, clubs, and organizations can pos
 ## 🎨 **Low Priority - Polish & Features**
 
 ### Campus-Specific Features
+> *Roadmap Alignment*: Milestone **Real-time Sync & Notifications**
 - [ ] **TODO: Event Calendar Integration**
   - Special handling for Category.EVENTS posts
   - Calendar view component
@@ -120,6 +130,7 @@ A campus social platform where students, staff, clubs, and organizations can pos
   - Club-specific posting privileges
 
 ### Validation & Error Handling
+> *Roadmap Alignment*: Milestone **Multi-user UI & Admin Experience**
 - [ ] **TODO: Create PostValidator.java**
   - Title length (1-200 characters)
   - Body length (1-5000 characters)
@@ -127,6 +138,7 @@ A campus social platform where students, staff, clubs, and organizations can pos
   - Location: `src/main/java/org/campusboard/sgs/validation/`
 
 ### UI Polish
+> *Roadmap Alignment*: Milestone **Real-time Sync & Notifications**
 - [ ] **TODO: Add Icons and Styling**
   - Like/dislike icons
   - Category badges with colors
