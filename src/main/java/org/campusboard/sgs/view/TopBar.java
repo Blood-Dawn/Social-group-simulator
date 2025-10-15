@@ -6,6 +6,7 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import org.campusboard.sgs.controller.Controller;
 import org.campusboard.sgs.controller.EventBus;
 import org.campusboard.sgs.controller.AppEvent;
@@ -28,7 +29,12 @@ public class TopBar extends JPanel {
     private JPanel leftPanel;
     private JPanel centerPanel;
     private JPanel rightPanel;
+    private JPanel userInfoPanel;
     private UserType currentRole = UserType.GUEST;
+    private ImageIcon guestAvatarIcon;
+    private ImageIcon userAvatarIcon;
+    private ImageIcon loginDoorIcon;
+    private ImageIcon logoutDoorIcon;
 
     private static final Color FAU_NAVY = new Color(0, 51, 102);
     private static final Color FAU_RED = new Color(206, 17, 65);
@@ -121,7 +127,7 @@ public class TopBar extends JPanel {
             }
         });
         
-        // USER INFO
+    // USER INFO
         userAvatarLabel = new JLabel();
         userAvatarLabel.setHorizontalAlignment(SwingConstants.CENTER);
         userAvatarLabel.setPreferredSize(new Dimension(36, 36));
@@ -132,8 +138,13 @@ public class TopBar extends JPanel {
         userNameLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         userNameLabel.setForeground(Color.WHITE);
 
+    userInfoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+    userInfoPanel.setOpaque(false);
+    userInfoPanel.add(userAvatarLabel);
+    userInfoPanel.add(userNameLabel);
+
         // LOGIN BUTTON
-        loginButton = new JButton("Login", loginDoorIcon);
+    loginButton = new JButton("Login", loginDoorIcon);
         loginButton.setFont(new Font("Arial", Font.PLAIN, 13));
         loginButton.setForeground(Color.WHITE);
         loginButton.setBackground(new Color(0, 82, 164));
@@ -155,7 +166,7 @@ public class TopBar extends JPanel {
         });
 
         // LOGOUT BUTTON
-        logoutButton = new JButton("Logout", logoutDoorIcon);
+    logoutButton = new JButton("Logout", logoutDoorIcon);
         logoutButton.setFont(new Font("Arial", Font.PLAIN, 13));
         logoutButton.setForeground(Color.WHITE);
         logoutButton.setBackground(FAU_NAVY);
@@ -285,31 +296,56 @@ public class TopBar extends JPanel {
         // LOGIN BUTTON - Prompt for username
         loginButton.addActionListener(e -> {
             System.out.println("🚪 TopBar: Login button clicked");
-            String username = JOptionPane.showInputDialog(
+
+            JTextField usernameField = new JTextField();
+            JPasswordField passwordField = new JPasswordField();
+
+            JPanel loginPanel = new JPanel(new GridLayout(0, 1, 4, 4));
+            loginPanel.add(new JLabel("Username:"));
+            loginPanel.add(usernameField);
+            loginPanel.add(new JLabel("Password:"));
+            loginPanel.add(passwordField);
+
+            int option = JOptionPane.showConfirmDialog(
                 this,
-                "Enter username:",
+                loginPanel,
                 "Login",
+                JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.PLAIN_MESSAGE
             );
 
-            if (username != null) {
-                String trimmed = username.trim();
-                if (!trimmed.isEmpty()) {
-                    boolean authenticated = controller.authenticateUser(trimmed, "");
-                    if (!authenticated) {
-                        JOptionPane.showMessageDialog(
-                            this,
-                            "We couldn't find an account for '" + trimmed + "'.",
-                            "Login failed",
-                            JOptionPane.WARNING_MESSAGE
-                        );
-                    }
-                } else {
+            if (option == JOptionPane.OK_OPTION) {
+                String username = usernameField.getText();
+                char[] password = passwordField.getPassword();
+
+                if (username == null || username.trim().isEmpty()) {
                     JOptionPane.showMessageDialog(
                         this,
                         "Please enter a username to continue.",
                         "Login required",
                         JOptionPane.INFORMATION_MESSAGE
+                    );
+                    Arrays.fill(password, '\0');
+                    passwordField.setText("");
+                    return;
+                }
+
+                Controller.AuthenticationResult result = controller.authenticateUser(username.trim(), password);
+                Arrays.fill(password, '\0');
+                passwordField.setText("");
+                if (result.isSuccess()) {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        result.getMessage(),
+                        "Login successful",
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
+                } else {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        result.getMessage(),
+                        "Login failed",
+                        JOptionPane.WARNING_MESSAGE
                     );
                 }
             }

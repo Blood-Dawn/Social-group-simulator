@@ -1,8 +1,12 @@
 package org.campusboard.sgs;
 
 import javax.swing.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import org.campusboard.sgs.Persistence.*;
 import org.campusboard.sgs.controller.*;
 import org.campusboard.sgs.model.*;
@@ -89,5 +93,77 @@ public class Main {
         Post post = new Post(title, body, category);
         post.setAuthor(author);
         return post;
+    }
+
+    private static boolean shouldUseRemoteRepository(String[] args) {
+        if (args != null) {
+            for (String arg : args) {
+                if (arg == null) {
+                    continue;
+                }
+                String trimmed = arg.trim().toLowerCase(Locale.ENGLISH);
+                if ("--remote".equals(trimmed) || "--remote=true".equals(trimmed)) {
+                    return true;
+                }
+                if ("--remote=false".equals(trimmed)) {
+                    return false;
+                }
+            }
+        }
+
+        String envFlag = System.getenv("SGS_REMOTE_ENABLED");
+        if (envFlag != null) {
+            String normalized = envFlag.trim().toLowerCase(Locale.ENGLISH);
+            if (!normalized.isEmpty()) {
+                return normalized.equals("true")
+                        || normalized.equals("1")
+                        || normalized.equals("yes")
+                        || normalized.equals("on");
+            }
+        }
+
+        return Boolean.getBoolean("sgs.remote");
+    }
+
+    private static String resolveRemoteUrl() {
+        String envUrl = System.getenv("SGS_REMOTE_URL");
+        if (envUrl != null && !envUrl.isBlank()) {
+            return envUrl.trim();
+        }
+
+        String sysProp = System.getProperty("sgs.remote.url");
+        if (sysProp != null && !sysProp.isBlank()) {
+            return sysProp.trim();
+        }
+
+        return "http://localhost:8080";
+    }
+
+    private static Duration resolvePollInterval() {
+        String envInterval = System.getenv("SGS_REMOTE_POLL_INTERVAL_SECONDS");
+        if (envInterval != null && !envInterval.isBlank()) {
+            try {
+                long seconds = Long.parseLong(envInterval.trim());
+                if (seconds > 0) {
+                    return Duration.ofSeconds(seconds);
+                }
+            } catch (NumberFormatException ignored) {
+                System.err.println("⚠️ Main: Invalid SGS_REMOTE_POLL_INTERVAL_SECONDS value, falling back to default");
+            }
+        }
+
+        String sysProp = System.getProperty("sgs.remote.poll.seconds");
+        if (sysProp != null && !sysProp.isBlank()) {
+            try {
+                long seconds = Long.parseLong(sysProp.trim());
+                if (seconds > 0) {
+                    return Duration.ofSeconds(seconds);
+                }
+            } catch (NumberFormatException ignored) {
+                System.err.println("⚠️ Main: Invalid sgs.remote.poll.seconds property, falling back to default");
+            }
+        }
+
+        return Duration.ofSeconds(5);
     }
 }
