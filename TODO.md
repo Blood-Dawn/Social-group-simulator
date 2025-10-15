@@ -22,37 +22,58 @@ A campus social platform where students, staff, clubs, and organizations can pos
   - Implement validation, repository calls, event publishing
   - Location: `src/main/java/org/campusboard/sgs/controller/Controller.java`
 
-### View Layer (UI Implementation)
-- [ ] **TODO: Complete MainWindow.java**
-  - Implement all TODO methods for layout and event handling
-  - Wire up components properly
+### View Layer (UI Implementation) - ✅ **COMPLETED BY DEO (10/14/2025)**
+
+- [x] **✅ DONE: Complete MainWindow.java**
+  - ✅ Layout implementation complete with BorderLayout
+  - ✅ Component wiring and event handling implemented
+  - ✅ Thread-safe UI updates with SwingUtilities.invokeLater
+  - ✅ EventBus integration ready (waiting on backend update)
   - Location: `src/main/java/org/campusboard/sgs/view/MainWindow.java`
 
-- [ ] **TODO: Complete TopBar.java**
-  - Implement search functionality
-  - Add create post button action
-  - Add login/logout functionality
+- [x] **✅ DONE: Complete TopBar.java**
+  - ✅ Search functionality with real-time filtering implemented
+  - ✅ Create post button with dialog integration
+  - ✅ Login/logout UI controls ready (waiting on Controller methods)
+  - ✅ FAU branding and professional styling
+  - ✅ Hover effects and modern design patterns
   - Location: `src/main/java/org/campusboard/sgs/view/TopBar.java`
 
-- [ ] **TODO: Complete FeedPanel.java**
-  - Implement scrollable posts display
-  - Handle post filtering and searching
+- [x] **✅ DONE: Complete FeedPanel.java**
+  - ✅ Scrollable posts display with BoxLayout
+  - ✅ Post filtering by category implemented
+  - ✅ Search filtering implemented
+  - ✅ Dual filtering system (category + search)
+  - ✅ Empty state handling
+  - ✅ EventBus subscriptions ready (waiting on backend update)
   - Location: `src/main/java/org/campusboard/sgs/view/FeedPanel.java`
 
-- [ ] **TODO: Complete PostCard.java**
-  - Implement post display with like/dislike buttons
-  - Add proper styling and layout
+- [x] **✅ DONE: Complete PostCard.java**
+  - ✅ Professional post display with all fields
+  - ✅ Like/dislike button functionality implemented
+  - ✅ Custom painted circular avatars
+  - ✅ Human-readable timestamp formatting
+  - ✅ Category badges with styling
+  - ✅ Delete button with confirmation
+  - ✅ Hover effects and shadows
   - Location: `src/main/java/org/campusboard/sgs/view/PostCard.java`
 
-- [ ] **TODO: Complete SidebarPanel.java**
-  - Implement category filtering
-  - Add campus-specific quick actions
-  - Location: `src/main/java/org/campusboard/sgs/view/SidbarPanel.java`
+- [x] **✅ DONE: Complete SidebarPanel.java**
+  - ✅ Category filtering with blue selection system
+  - ✅ Quick access shortcuts
+  - ✅ All category buttons with icons
+  - ✅ Clear filters button
+  - ✅ Hover effects
+  - ✅ EventBus integration ready (waiting on backend update)
+  - Location: `src/main/java/org/campusboard/sgs/view/SidebarPanel.java`
 
-- [ ] **TODO: Complete CreatePostDialog.java**
-  - Implement form validation
-  - Add character limits and proper styling
-  - Location: Already created, needs implementation
+- [x] **✅ DONE: Complete CreatePostDialog.java**
+  - ✅ Form validation (title, body, category)
+  - ✅ Character limits and proper styling
+  - ✅ Keyboard shortcuts (Enter to advance fields)
+  - ✅ Error dialogs for validation
+  - ✅ Category dropdown with all options
+  - Location: `src/main/java/org/campusboard/sgs/view/dialogs/CreatePostDialog.java`
 
 ### Main Application Wiring
 - [ ] **TODO: Complete Main.java**
