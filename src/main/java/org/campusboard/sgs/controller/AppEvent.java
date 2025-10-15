@@ -19,7 +19,7 @@ public enum AppEvent {
     
     // Navigation & Filtering
     FILTER_CHANGED,
-    SEARCH_CHANGED,
+    SEARCH_REQUESTED,
     CATEGORY_CHANGED,
     SORT_CHANGED,
     

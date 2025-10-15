@@ -13,111 +13,194 @@ import java.util.List;
 public class Controller {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final EventBus eventBus;
-    
-    public Controller(PostRepository postRepository, UserRepository userRepository, EventBus eventBus) {
+    private User currentUser;
+    private Category activeFilter;
+    private String searchQuery = "";
+
+    public Controller(PostRepository postRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
-        this.eventBus = eventBus;
     }
     
     // ============ POST MANAGEMENT ============
     
     public void createPost(String title, String body) {
-        // TODO: Validate title and body (not empty, length limits)
-        // TODO: Create Post with Category.GENERAL
-        // TODO: Save to repository
-        // TODO: Publish POST_CREATED and POSTS_CHANGED events
+        createPost(title, body, Category.GENERAL);
     }
     
     public void createPost(String title, String body, Category category) {
-        // TODO: Validate title and body (not empty, length limits)
-        // TODO: Create Post with specified category
-        // TODO: Save to repository
-        // TODO: Publish POST_CREATED and POSTS_CHANGED events
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Title cannot be empty");
+        }
+        if (body == null || body.trim().isEmpty()) {
+            throw new IllegalArgumentException("Body cannot be empty");
+        }
+
+        Post post = new Post(title.trim(), body.trim(), category == null ? Category.GENERAL : category);
+        if (currentUser != null) {
+            post.setAuthor(currentUser.getUsername());
+        }
+
+        postRepository.save(post);
+        EventBus.publish(AppEvent.POST_CREATED, post);
+        EventBus.publish(AppEvent.POSTS_CHANGED);
     }
     
     public void deletePost(UUID postId) {
-        // TODO: Check if post exists
-        // TODO: Delete from repository
-        // TODO: Publish POST_DELETED and POSTS_CHANGED events
+        if (postId == null) {
+            return;
+        }
+
+        if (postRepository.delete(postId)) {
+            EventBus.publish(AppEvent.POST_DELETED, postId);
+            EventBus.publish(AppEvent.POSTS_CHANGED);
+        }
     }
     
     public void likePost(UUID postId) {
-        // TODO: Find post and increment likes
-        // TODO: Publish POST_LIKED event
+        if (postId == null) {
+            return;
+        }
+
+        Post post = postRepository.likePost(postId);
+        if (post != null) {
+            EventBus.publish(AppEvent.POST_LIKED, post);
+            EventBus.publish(AppEvent.POSTS_CHANGED);
+        }
     }
     
     public void dislikePost(UUID postId) {
-        // TODO: Find post and increment dislikes
-        // TODO: Publish POST_DISLIKED event
+        if (postId == null) {
+            return;
+        }
+
+        Post post = postRepository.dislikePost(postId);
+        if (post != null) {
+            EventBus.publish(AppEvent.POST_DISLIKED, post);
+            EventBus.publish(AppEvent.POSTS_CHANGED);
+        }
     }
     
     public List<Post> getAllPosts() {
-        // TODO: Return all posts from repository
-        return null;
+        List<Post> posts = postRepository.findAll();
+        posts.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+
+        if (activeFilter != null) {
+            posts.removeIf(post -> post.getCategory() != activeFilter);
+        }
+
+        if (searchQuery != null && !searchQuery.isBlank()) {
+            String query = searchQuery.toLowerCase();
+            posts.removeIf(post -> !containsIgnoreCase(post.getTitle(), query)
+                    && !containsIgnoreCase(post.getBody(), query));
+        }
+
+        return posts;
     }
     
     public List<Post> getPostsByCategory(Category category) {
-        // TODO: Filter posts by category
-        // TODO: Use CategoryFilter
-        return null;
+        if (category == null) {
+            return getAllPosts();
+        }
+
+        List<Post> posts = postRepository.findAll();
+        posts.removeIf(post -> post.getCategory() != category);
+        posts.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+        return posts;
     }
     
     // ============ USER MANAGEMENT ============
     
     public void createUser(String username, String email, String displayName, UserType userType) {
-        // TODO: Validate user data
-        // TODO: Check if username/email already exists
-        // TODO: Create and save user
-        // TODO: Publish USER_CREATED event (add to AppEvent enum)
+        if (username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be empty");
+        }
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("Email cannot be empty");
+        }
+
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+
+        User user = new User(username.trim(), email.trim(), displayName, userType);
+        userRepository.save(user);
+        EventBus.publish(AppEvent.DATA_LOADED, user);
     }
     
     public boolean authenticateUser(String username, String password) {
-        // TODO: Implement authentication logic
-        // TODO: Publish USER_LOGGED_IN event on success
-        return false;
+        // Placeholder authentication: match by username only.
+        return userRepository.findByUsername(username)
+                .map(user -> {
+                    setCurrentUser(user);
+                    return true;
+                })
+                .orElse(false);
     }
     
-    public void logoutUser() {
-        // TODO: Clear current user session
-        // TODO: Publish USER_LOGGED_OUT event
+    public User getCurrentUser() {
+        return currentUser;
+    }
+
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        if (user != null) {
+            EventBus.publish(AppEvent.USER_LOGGED_IN, user);
+        }
+    }
+
+    public void logout() {
+        if (currentUser != null) {
+            currentUser = null;
+            EventBus.publish(AppEvent.USER_LOGGED_OUT);
+        }
+    }
+
+    public void performSearch(String query) {
+        searchQuery = query == null ? "" : query.trim();
+        EventBus.publish(AppEvent.SEARCH_REQUESTED, searchQuery);
+        EventBus.publish(AppEvent.POSTS_CHANGED);
     }
     
     // ============ SEARCH & FILTER ============
     
     public List<Post> searchPosts(String query) {
-        // TODO: Search posts by title and body content
-        // TODO: Publish SEARCH_CHANGED event
-        return null;
+        performSearch(query);
+        return getAllPosts();
     }
     
     public void applyFilter(Category category) {
-        // TODO: Apply category filter
-        // TODO: Publish FILTER_CHANGED event
+        activeFilter = category;
+        EventBus.publish(AppEvent.FILTER_CHANGED, category);
+        EventBus.publish(AppEvent.POSTS_CHANGED);
     }
     
     public void clearFilters() {
-        // TODO: Remove all filters
-        // TODO: Publish FILTER_CHANGED event
+        activeFilter = null;
+        searchQuery = "";
+        EventBus.publish(AppEvent.FILTER_CHANGED, null);
+        EventBus.publish(AppEvent.SEARCH_REQUESTED, "");
+        EventBus.publish(AppEvent.POSTS_CHANGED);
     }
     
     // ============ CAMPUS-SPECIFIC FEATURES ============
     
     public List<Post> getAnnouncementsPosts() {
-        // TODO: Get all posts with Category.ANNOUNCEMENTS
-        // TODO: Sort by creation date (newest first)
-        return null;
+        return getPostsByCategory(Category.ANNOUNCEMENTS);
     }
     
     public List<Post> getEventsPosts() {
-        // TODO: Get all posts with Category.EVENTS
-        // TODO: Sort by creation date (newest first)
-        return null;
+        return getPostsByCategory(Category.EVENTS);
     }
     
     public List<Post> getClubsPosts() {
-        // TODO: Get all posts with Category.CLUBS_ORGS
-        return null;
+        return getPostsByCategory(Category.CLUBS_ORGS);
+    }
+
+    private boolean containsIgnoreCase(String value, String query) {
+        return value != null && value.toLowerCase().contains(query);
     }
 }

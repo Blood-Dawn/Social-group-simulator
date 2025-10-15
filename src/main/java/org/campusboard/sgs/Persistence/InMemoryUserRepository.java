@@ -3,49 +3,73 @@ package org.campusboard.sgs.Persistence;
 import org.campusboard.sgs.model.User;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class InMemoryUserRepository implements UserRepository {
     private final Map<UUID, User> users = new ConcurrentHashMap<>();
 
     @Override
     public List<User> findAll() {
-        // TODO: Return list of all active users
-        return null;
+        return users.values().stream()
+                .filter(User::isActive)
+                .collect(Collectors.toList());
     }
 
     @Override
     public Optional<User> findById(UUID id) {
-        // TODO: Find user by UUID
-        return null;
+        return Optional.ofNullable(users.get(id))
+                .filter(User::isActive);
     }
 
     @Override
     public Optional<User> findByUsername(String username) {
-        // TODO: Find user by username (case-insensitive)
-        return null;
+        if (username == null) {
+            return Optional.empty();
+        }
+        String target = username.toLowerCase(Locale.ROOT);
+        return users.values().stream()
+                .filter(User::isActive)
+                .filter(user -> user.getUsername() != null && user.getUsername().equalsIgnoreCase(target))
+                .findFirst();
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
-        // TODO: Find user by email (case-insensitive)
-        return null;
+        if (email == null) {
+            return Optional.empty();
+        }
+        String target = email.toLowerCase(Locale.ROOT);
+        return users.values().stream()
+                .filter(User::isActive)
+                .filter(user -> user.getEmail() != null && user.getEmail().equalsIgnoreCase(target))
+                .findFirst();
     }
 
     @Override
     public User save(User user) {
-        // TODO: Save new user to map
-        return null;
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+        users.put(user.getId(), user);
+        return user;
     }
 
     @Override
     public User update(User user) {
-        // TODO: Update existing user if exists
-        return null;
+        if (user == null || !users.containsKey(user.getId())) {
+            return null;
+        }
+        users.put(user.getId(), user);
+        return user;
     }
 
     @Override
     public boolean delete(UUID id) {
-        // TODO: Set user as inactive rather than deleting
-        return false;
+        User user = users.get(id);
+        if (user == null) {
+            return false;
+        }
+        user.setActive(false);
+        return true;
     }
 }

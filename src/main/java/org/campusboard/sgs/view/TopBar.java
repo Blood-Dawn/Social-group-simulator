@@ -7,14 +7,13 @@ import java.awt.*;
 import org.campusboard.sgs.controller.Controller;
 import org.campusboard.sgs.controller.EventBus;
 import org.campusboard.sgs.controller.AppEvent;
-import org.campusboard.sgs.view.CreatePostDialog;
+import org.campusboard.sgs.view.dialogs.CreatePostDialog;
 
 /**
  * Top navigation bar with search, create post, and user controls
  */
 public class TopBar extends JPanel {
     private Controller controller;
-    private EventBus eventBus;
     
     private JTextField searchField;
     private JButton createPostButton;
@@ -26,9 +25,8 @@ public class TopBar extends JPanel {
     private static final Color SEARCH_BG = new Color(245, 245, 245);
     private static final Color SEARCH_BORDER = new Color(220, 220, 220);
     
-    public TopBar(Controller controller, EventBus eventBus) {
+    public TopBar(Controller controller) {
         this.controller = controller;
-        this.eventBus = eventBus;
         
         System.out.println("🔝 TopBar: Initializing top bar...");
         

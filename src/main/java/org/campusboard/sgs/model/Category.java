@@ -64,5 +64,36 @@ public enum Category {
     GENERAL,
     HUMOR_MEMES,
     OFF_TOPIC,
-    OTHER
+    OTHER,
+    MARKETPLACE("Marketplace"),
+    LOST_AND_FOUND("Lost & Found");
+
+    private final String displayName;
+
+    Category() {
+        this.displayName = formatDisplayName(name());
+    }
+
+    Category(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    private static String formatDisplayName(String rawName) {
+        String lower = rawName.toLowerCase().replace('_', ' ');
+        String[] tokens = lower.split(" ");
+        StringBuilder builder = new StringBuilder();
+        for (String token : tokens) {
+            if (token.isEmpty()) {
+                continue;
+            }
+            builder.append(Character.toUpperCase(token.charAt(0)))
+                   .append(token.substring(1))
+                   .append(' ');
+        }
+        return builder.toString().trim();
+    }
 }

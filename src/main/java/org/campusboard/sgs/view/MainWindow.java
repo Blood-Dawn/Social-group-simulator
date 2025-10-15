@@ -3,8 +3,8 @@ package org.campusboard.sgs.view;
 import javax.swing.*;
 import java.awt.*;
 import org.campusboard.sgs.controller.Controller;
-import org.campusboard.sgs.controller.EventBus;
 import org.campusboard.sgs.controller.AppEvent;
+import org.campusboard.sgs.controller.EventBus;
 
 /**
  * Main application window - assembles all components together
@@ -12,18 +12,16 @@ import org.campusboard.sgs.controller.AppEvent;
  */
 public class MainWindow extends JFrame {
     private Controller controller;
-    private EventBus eventBus;
-    
+
     private TopBar topBar;
     private SidebarPanel sidebarPanel;
     private FeedPanel feedPanel;
-    
+
     private static final Color FAU_NAVY = new Color(0, 51, 102);
-    
-    public MainWindow(Controller controller, EventBus eventBus) {
+
+    public MainWindow(Controller controller) {
         super("Campus Board - FAU");
         this.controller = controller;
-        this.eventBus = eventBus;
         
         System.out.println("🏠 MainWindow: Initializing main window...");
         
@@ -45,9 +43,9 @@ public class MainWindow extends JFrame {
     private void initializeComponents() {
         System.out.println("🏠 MainWindow: Creating components...");
         
-        topBar = new TopBar(controller, eventBus);
+        topBar = new TopBar(controller);
         sidebarPanel = new SidebarPanel(controller);
-        feedPanel = new FeedPanel(controller, eventBus);
+        feedPanel = new FeedPanel(controller);
     }
     
     /**
@@ -57,6 +55,9 @@ public class MainWindow extends JFrame {
         System.out.println("🏠 MainWindow: Setting up layout...");
         
         setLayout(new BorderLayout());
+        
+        // Use FAU_NAVY as the background for the main content pane so the constant is utilized
+        getContentPane().setBackground(FAU_NAVY);
         
         add(topBar, BorderLayout.NORTH);
         add(sidebarPanel, BorderLayout.WEST);
@@ -72,7 +73,7 @@ public class MainWindow extends JFrame {
         
         try {
             // When posts change, refresh the feed
-            EventBus.subscribe(AppEvent.POSTS_CHANGED, data -> {
+            EventBus.subscribe(AppEvent.POSTS_CHANGED, payload -> {
                 SwingUtilities.invokeLater(() -> {
                     System.out.println("🏠 MainWindow: Posts changed, refreshing feed");
                     refreshFeed();
@@ -80,7 +81,7 @@ public class MainWindow extends JFrame {
             });
             
             // When user logs in, update display
-            EventBus.subscribe(AppEvent.USER_LOGGED_IN, data -> {
+            EventBus.subscribe(AppEvent.USER_LOGGED_IN, payload -> {
                 SwingUtilities.invokeLater(() -> {
                     System.out.println("🏠 MainWindow: User logged in, updating UI");
                     updateUserInfo();
@@ -88,7 +89,7 @@ public class MainWindow extends JFrame {
             });
             
             // When user logs out, show login prompt
-            EventBus.subscribe(AppEvent.USER_LOGGED_OUT, data -> {
+            EventBus.subscribe(AppEvent.USER_LOGGED_OUT, payload -> {
                 SwingUtilities.invokeLater(() -> {
                     System.out.println("🏠 MainWindow: User logged out, showing login prompt");
                     showLoginPrompt();

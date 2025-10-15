@@ -1,4 +1,4 @@
-package org.campusboard.sgs.view;
+package org.campusboard.sgs.view.dialogs;
 
 import javax.swing.*;
 import java.awt.*;
