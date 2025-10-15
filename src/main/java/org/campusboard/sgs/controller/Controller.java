@@ -3,8 +3,10 @@ package org.campusboard.sgs.controller;
 import org.campusboard.sgs.model.*;
 import org.campusboard.sgs.Persistence.PostRepository;
 import org.campusboard.sgs.Persistence.UserRepository;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Main controller for the campus board application.
@@ -131,14 +133,61 @@ public class Controller {
         EventBus.publish(AppEvent.DATA_LOADED, user);
     }
     
-    public boolean authenticateUser(String username, String password) {
-        // Placeholder authentication: match by username only.
-        return userRepository.findByUsername(username)
-                .map(user -> {
-                    setCurrentUser(user);
-                    return true;
-                })
-                .orElse(false);
+    public AuthenticationResult authenticateUser(String username, char[] password) {
+        if (username == null || username.isBlank()) {
+            return AuthenticationResult.failure("Username is required.");
+        }
+        if (password == null || password.length == 0) {
+            return AuthenticationResult.failure("Password is required.");
+        }
+
+        char[] passwordCopy = Arrays.copyOf(password, password.length);
+        try {
+            return userRepository.findByUsername(username.trim())
+                    .map(user -> {
+                        boolean valid = userRepository.validatePassword(user, passwordCopy);
+                        if (valid) {
+                            user.resetFailedLoginAttempts();
+                            user.setLastLoginAt(LocalDateTime.now());
+                            userRepository.update(user);
+                            setCurrentUser(user);
+                            return AuthenticationResult.success("Welcome back, " + user.getDisplayName() + "!");
+                        }
+
+                        user.incrementFailedLoginAttempts();
+                        userRepository.update(user);
+                        return AuthenticationResult.failure("Invalid username or password. Attempts: " + user.getFailedLoginAttempts());
+                    })
+                    .orElse(AuthenticationResult.failure("Invalid username or password."));
+        } finally {
+            Arrays.fill(passwordCopy, '\0');
+        }
+    }
+
+    public static class AuthenticationResult {
+        private final boolean success;
+        private final String message;
+
+        private AuthenticationResult(boolean success, String message) {
+            this.success = success;
+            this.message = message;
+        }
+
+        public static AuthenticationResult success(String message) {
+            return new AuthenticationResult(true, message);
+        }
+
+        public static AuthenticationResult failure(String message) {
+            return new AuthenticationResult(false, message);
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public String getMessage() {
+            return message;
+        }
     }
     
     public User getCurrentUser() {
