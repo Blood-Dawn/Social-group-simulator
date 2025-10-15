@@ -31,6 +31,7 @@ public enum AppEvent {
     // User Management
     USER_LOGGED_IN,
     USER_LOGGED_OUT,
+    USER_ROLE_CHANGED,
     PROFILE_UPDATED,
     
     // System Events

@@ -9,6 +9,7 @@ import org.campusboard.sgs.controller.EventBus;
 import org.campusboard.sgs.controller.AppEvent;
 import org.campusboard.sgs.model.Post;
 import org.campusboard.sgs.model.Category;
+import org.campusboard.sgs.model.UserType;
 
 /**
  * Feed panel - Displays scrollable list of posts with filtering
@@ -18,8 +19,18 @@ public class FeedPanel extends JPanel {
 
     private JPanel postsContainer;
     private JScrollPane scrollPane;
+    private JPanel bannerPanel;
+    private JLabel bannerLabel;
     private Category currentFilter = null;
     private String currentSearchQuery = "";
+    private UserType currentRole = UserType.GUEST;
+
+    private static final Color ADMIN_BANNER_BG = new Color(255, 243, 205);
+    private static final Color ADMIN_BANNER_TEXT = new Color(120, 70, 0);
+    private static final Color GUEST_BANNER_BG = new Color(227, 242, 253);
+    private static final Color GUEST_BANNER_TEXT = new Color(33, 89, 150);
+    private static final Color DEFAULT_BANNER_BG = new Color(232, 248, 245);
+    private static final Color DEFAULT_BANNER_TEXT = new Color(20, 92, 68);
 
     public FeedPanel(Controller controller) {
         this.controller = controller;
@@ -29,6 +40,7 @@ public class FeedPanel extends JPanel {
         initializeComponents();
         setupLayout();
         setupEventListeners();
+        applyRoleStyling(controller.getCurrentUserType());
 
         loadInitialPosts();
     }
@@ -49,6 +61,12 @@ public class FeedPanel extends JPanel {
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+        bannerPanel = new JPanel(new BorderLayout());
+        bannerPanel.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
+        bannerLabel = new JLabel("Guest mode: sign in to participate in the community.");
+        bannerLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        bannerPanel.add(bannerLabel, BorderLayout.WEST);
     }
 
     /**
@@ -59,6 +77,7 @@ public class FeedPanel extends JPanel {
 
         setLayout(new BorderLayout());
         setBackground(new Color(248, 249, 250));
+        add(bannerPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
     }
 
@@ -100,6 +119,14 @@ public class FeedPanel extends JPanel {
             } catch (IllegalArgumentException e) {
                 System.err.println("⚠️ FeedPanel: AppEvent 'SEARCH_REQUESTED' not found; search events will be ignored.");
             }
+
+            EventBus.subscribe(AppEvent.USER_ROLE_CHANGED, payload -> {
+                SwingUtilities.invokeLater(() -> {
+                    UserType role = payload instanceof UserType ? (UserType) payload : UserType.GUEST;
+                    applyRoleStyling(role);
+                    refreshPosts();
+                });
+            });
         } catch (Exception e) {
             System.err.println("⚠️ FeedPanel: Error setting up event listeners: " + e.getMessage());
             e.printStackTrace();
@@ -129,7 +156,10 @@ public class FeedPanel extends JPanel {
             // Empty state
             if (posts == null || posts.isEmpty()) {
                 System.out.println("📋 FeedPanel: No posts to display");
-                JLabel emptyLabel = new JLabel("No posts yet. Click 'New Post' to create one!");
+                String emptyMessage = currentRole == UserType.GUEST
+                        ? "No posts yet. Sign in to start the conversation!"
+                        : "No posts yet. Click 'New Post' to create one!";
+                JLabel emptyLabel = new JLabel(emptyMessage);
                 emptyLabel.setFont(new Font("Arial", Font.PLAIN, 16));
                 emptyLabel.setForeground(Color.GRAY);
                 emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -150,6 +180,7 @@ public class FeedPanel extends JPanel {
                 try {
                     System.out.println("  📄 Creating card for: " + post.getTitle());
                     PostCard card = new PostCard(post, controller);
+                    card.applyRole(controller.getCurrentUserType());
 
                     card.setMaximumSize(new Dimension(Integer.MAX_VALUE, card.getPreferredSize().height));
                     card.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -205,5 +236,32 @@ public class FeedPanel extends JPanel {
         }
 
         return filtered;
+    }
+
+    private void applyRoleStyling(UserType role) {
+        currentRole = role == null ? UserType.GUEST : role;
+        boolean isAdmin = currentRole == UserType.STAFF || currentRole == UserType.ADMINISTRATION;
+        boolean isGuest = currentRole == UserType.GUEST;
+
+        if (isAdmin) {
+            bannerPanel.setBackground(ADMIN_BANNER_BG);
+            bannerLabel.setText("Admin mode: moderation controls are enabled across the feed.");
+            bannerLabel.setForeground(ADMIN_BANNER_TEXT);
+            postsContainer.setBackground(new Color(254, 248, 236));
+        } else if (isGuest) {
+            bannerPanel.setBackground(GUEST_BANNER_BG);
+            bannerLabel.setText("Guest mode: sign in to create, like, or moderate posts.");
+            bannerLabel.setForeground(GUEST_BANNER_TEXT);
+            postsContainer.setBackground(new Color(248, 249, 250));
+        } else {
+            bannerPanel.setBackground(DEFAULT_BANNER_BG);
+            bannerLabel.setText("Community mode: enjoy posting and engaging with classmates.");
+            bannerLabel.setForeground(DEFAULT_BANNER_TEXT);
+            postsContainer.setBackground(new Color(243, 250, 247));
+        }
+
+        bannerPanel.setVisible(true);
+        revalidate();
+        repaint();
     }
 }
