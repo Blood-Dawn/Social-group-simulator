@@ -12,9 +12,9 @@ public interface UserRepository {
     User save(User user);
     User update(User user);
     boolean delete(UUID id);
-    
-    // TODO: Add authentication methods
-    // TODO: boolean authenticate(String username, String password);
+
+    void assignPassword(User user, char[] password);
+    boolean validatePassword(User user, char[] password);
     // TODO: List<User> findByUserType(UserType userType);
     // TODO: List<User> findByDepartment(String department);
     // TODO: List<User> findByOrganization(String organization);
