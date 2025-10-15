@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import org.campusboard.sgs.controller.Controller;
 import org.campusboard.sgs.controller.EventBus;
 import org.campusboard.sgs.controller.AppEvent;
+import org.campusboard.sgs.model.UserType;
 import org.campusboard.sgs.view.dialogs.CreatePostDialog;
 
 /**
@@ -23,16 +24,20 @@ public class TopBar extends JPanel {
     private JLabel userNameLabel;
     private JButton loginButton;
     private JButton logoutButton;
+    private JLabel roleBadge;
+    private JPanel leftPanel;
+    private JPanel centerPanel;
+    private JPanel rightPanel;
+    private UserType currentRole = UserType.GUEST;
 
-    private ImageIcon guestAvatarIcon;
-    private ImageIcon userAvatarIcon;
-    private ImageIcon loginDoorIcon;
-    private ImageIcon logoutDoorIcon;
-    
     private static final Color FAU_NAVY = new Color(0, 51, 102);
     private static final Color FAU_RED = new Color(206, 17, 65);
     private static final Color SEARCH_BG = new Color(245, 245, 245);
     private static final Color SEARCH_BORDER = new Color(220, 220, 220);
+    private static final Color ADMIN_NAVY = new Color(15, 67, 118);
+    private static final Color ADMIN_BADGE_BG = new Color(255, 215, 64);
+    private static final Color GUEST_BADGE_BG = new Color(230, 230, 230);
+    private static final Color STAFF_BADGE_BG = new Color(186, 230, 253);
     
     public TopBar(Controller controller) {
         this.controller = controller;
@@ -188,7 +193,7 @@ public class TopBar extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         
         // LEFT - Logo + Title
-        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
+        leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
         leftPanel.setBackground(FAU_NAVY);
         
         JLabel logo = new JLabel("F");
@@ -207,7 +212,7 @@ public class TopBar extends JPanel {
         leftPanel.add(title);
         
         // CENTER - Search
-        JPanel centerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 8));
+        centerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 8));
         centerPanel.setBackground(FAU_NAVY);
         
         JLabel searchIcon = new JLabel("🔍");
@@ -216,16 +221,18 @@ public class TopBar extends JPanel {
         centerPanel.add(searchIcon);
         centerPanel.add(searchField);
         
-        // RIGHT - Create Post + User + Auth Buttons
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 8));
+        // RIGHT - Create Post + User + Logout
+        rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 8));
         rightPanel.setBackground(FAU_NAVY);
 
-        JPanel userInfoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 6));
-        userInfoPanel.setBackground(FAU_NAVY);
-        userInfoPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        userInfoPanel.add(userAvatarLabel);
-        userInfoPanel.add(userNameLabel);
+        roleBadge = new JLabel("Guest Mode");
+        roleBadge.setFont(new Font("Arial", Font.BOLD, 12));
+        roleBadge.setOpaque(true);
+        roleBadge.setBorder(BorderFactory.createEmptyBorder(6, 10, 6, 10));
+        roleBadge.setBackground(GUEST_BADGE_BG);
+        roleBadge.setForeground(Color.DARK_GRAY);
 
+        rightPanel.add(roleBadge);
         rightPanel.add(createPostButton);
         rightPanel.add(userInfoPanel);
         rightPanel.add(loginButton);
@@ -333,11 +340,18 @@ public class TopBar extends JPanel {
                     updateUserDisplay();
                 });
             });
-            
+
             EventBus.subscribe(AppEvent.USER_LOGGED_OUT, data -> {
                 SwingUtilities.invokeLater(() -> {
                     System.out.println("🔝 TopBar: User logged out, updating display");
                     updateUserDisplay();
+                });
+            });
+
+            EventBus.subscribe(AppEvent.USER_ROLE_CHANGED, data -> {
+                SwingUtilities.invokeLater(() -> {
+                    System.out.println("🔝 TopBar: Role changed, applying styling");
+                    applyRoleStyling(data instanceof UserType ? (UserType) data : UserType.GUEST);
                 });
             });
         } catch (Exception e) {
@@ -353,6 +367,7 @@ public class TopBar extends JPanel {
         
         try {
             var user = controller.getCurrentUser();
+            applyRoleStyling(controller.getCurrentUserType());
             if (user != null) {
                 userAvatarLabel.setIcon(userAvatarIcon);
                 userAvatarLabel.setToolTipText("Authenticated user avatar");
@@ -513,5 +528,48 @@ public class TopBar extends JPanel {
         }
 
         return new ImageIcon(image);
+    }
+
+    private void applyRoleStyling(UserType role) {
+        currentRole = role == null ? UserType.GUEST : role;
+        boolean isGuest = currentRole == UserType.GUEST;
+        boolean isAdmin = isAdminRole(currentRole);
+
+        Color barColor = isAdmin ? ADMIN_NAVY : FAU_NAVY;
+        setBackground(barColor);
+        if (leftPanel != null) {
+            leftPanel.setBackground(barColor);
+        }
+        if (centerPanel != null) {
+            centerPanel.setBackground(barColor);
+        }
+        if (rightPanel != null) {
+            rightPanel.setBackground(barColor);
+        }
+
+        createPostButton.setVisible(!isGuest);
+        createPostButton.setEnabled(!isGuest);
+
+        if (isGuest) {
+            roleBadge.setText("Guest Mode");
+            roleBadge.setBackground(GUEST_BADGE_BG);
+            roleBadge.setForeground(Color.DARK_GRAY);
+        } else if (isAdmin) {
+            roleBadge.setText("Admin Controls");
+            roleBadge.setBackground(ADMIN_BADGE_BG);
+            roleBadge.setForeground(new Color(90, 60, 0));
+        } else {
+            roleBadge.setText(currentRole.name().substring(0, 1) + currentRole.name().substring(1).toLowerCase());
+            roleBadge.setBackground(STAFF_BADGE_BG);
+            roleBadge.setForeground(new Color(20, 60, 90));
+        }
+
+        roleBadge.setVisible(true);
+        revalidate();
+        repaint();
+    }
+
+    private boolean isAdminRole(UserType role) {
+        return role == UserType.STAFF || role == UserType.ADMINISTRATION;
     }
 }

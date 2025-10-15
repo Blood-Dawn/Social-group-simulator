@@ -8,6 +8,16 @@ public class InMemoryPostRepository implements PostRepository {
 
     private final Map<UUID, Post> posts = new ConcurrentHashMap<>();
 
+    public void replaceAll(Collection<Post> newPosts) {
+        posts.clear();
+        if (newPosts == null) {
+            return;
+        }
+        for (Post post : newPosts) {
+            posts.put(post.getId(), post);
+        }
+    }
+
     @Override
     public List<Post> findAll() {
         return new ArrayList<>(posts.values());
