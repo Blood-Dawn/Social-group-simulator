@@ -14,13 +14,44 @@ import org.campusboard.sgs.view.MainWindow;
 public class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            PostRepository postRepo = new InMemoryPostRepository();
+            boolean useRemoteRepository = shouldUseRemoteRepository(args);
+
+            PostRepository postRepo;
+            RemotePostSyncClient syncClient = null;
+
+            if (useRemoteRepository) {
+                String remoteUrl = resolveRemoteUrl();
+                Duration pollInterval = resolvePollInterval();
+                System.out.println("🌐 Main: Using remote post repository at " + remoteUrl + " (poll interval " + pollInterval.toSeconds() + "s)");
+
+                RemotePostRepository remoteRepo = new RemotePostRepository(remoteUrl);
+                remoteRepo.addRemoteUpdateListener(posts -> EventBus.publish(AppEvent.POSTS_CHANGED, posts));
+                remoteRepo.refreshFromRemote();
+
+                syncClient = new RemotePostSyncClient(remoteRepo, pollInterval);
+                syncClient.start();
+
+                postRepo = remoteRepo;
+            } else {
+                System.out.println("💾 Main: Using in-memory post repository");
+                postRepo = new InMemoryPostRepository();
+            }
+
             UserRepository userRepo = new InMemoryUserRepository();
             Controller controller = new Controller(postRepo, userRepo);
 
             seedDemoData(postRepo, userRepo);
 
             MainWindow mainWindow = new MainWindow(controller);
+            if (syncClient != null) {
+                RemotePostSyncClient finalSyncClient = syncClient;
+                mainWindow.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        finalSyncClient.close();
+                    }
+                });
+            }
             mainWindow.setVisible(true);
             mainWindow.showLoginPrompt();
         });
