@@ -16,6 +16,11 @@ import org.campusboard.sgs.model.User;
 public class PostCard extends JPanel {
     private Controller controller;
     private Post post;
+    private JButton deleteButton;
+    private JButton moderateButton;
+    private JLabel adminBadge;
+    private JPanel headerPanel;
+    private UserType currentRole = UserType.GUEST;
     
     private static final Color FAU_NAVY = new Color(0, 51, 102);
     private static final Color FAU_RED = new Color(206, 17, 65);
@@ -27,8 +32,9 @@ public class PostCard extends JPanel {
     public PostCard(Post post, Controller controller) {
         this.post = post;
         this.controller = controller;
-        
+
         initializeModernCard();
+        applyRole(controller.getCurrentUserType());
     }
     
     /**
@@ -68,7 +74,8 @@ public class PostCard extends JPanel {
     private JPanel createHeaderSection() {
         JPanel header = new JPanel(new BorderLayout());
         header.setOpaque(false);
-        
+        headerPanel = header;
+
         // LEFT - Avatar + User info
         JPanel userInfo = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         userInfo.setOpaque(false);
@@ -111,15 +118,20 @@ public class PostCard extends JPanel {
         JLabel categoryBadge = createRoundedBadge(post.getCategory().name());
         rightSide.add(categoryBadge);
         
-        JButton deleteBtn = createIconButton("×");
-        deleteBtn.setFont(new Font("Arial", Font.BOLD, 20));
-        deleteBtn.setToolTipText("Delete post");
-        deleteBtn.addActionListener(e -> handleDelete());
-        rightSide.add(deleteBtn);
-        
+        deleteButton = createIconButton("×");
+        deleteButton.setFont(new Font("Arial", Font.BOLD, 20));
+        deleteButton.setToolTipText("Delete post");
+        deleteButton.addActionListener(e -> handleDelete());
+        rightSide.add(deleteButton);
+
+        moderateButton = createIconButton("⚠");
+        moderateButton.setToolTipText("Moderate post");
+        moderateButton.addActionListener(e -> System.out.println("🛡 Moderation requested for post: " + post.getId()));
+        rightSide.add(moderateButton);
+
         header.add(userInfo, BorderLayout.WEST);
         header.add(rightSide, BorderLayout.EAST);
-        
+
         return header;
     }
     
@@ -270,10 +282,39 @@ public class PostCard extends JPanel {
                 btn.setForeground(TEXT_SECONDARY);
             }
         });
-        
+
         return btn;
     }
-    
+
+    public void applyRole(UserType role) {
+        currentRole = role == null ? UserType.GUEST : role;
+        boolean isGuest = currentRole == UserType.GUEST;
+        boolean isAdmin = isAdminRole(currentRole);
+
+        if (deleteButton != null) {
+            deleteButton.setVisible(!isGuest);
+        }
+        if (moderateButton != null) {
+            moderateButton.setVisible(isAdmin);
+        }
+        if (adminBadge != null) {
+            adminBadge.setVisible(isAdmin);
+        }
+
+        if (headerPanel != null) {
+            if (isAdmin) {
+                headerPanel.setOpaque(true);
+                headerPanel.setBackground(new Color(255, 245, 225));
+            } else {
+                headerPanel.setOpaque(false);
+                headerPanel.setBackground(CARD_BACKGROUND);
+            }
+        }
+
+        revalidate();
+        repaint();
+    }
+
     /**
      * Handle like button click
      */
@@ -296,6 +337,10 @@ public class PostCard extends JPanel {
         if (confirm == JOptionPane.YES_OPTION) {
             controller.deletePost(post.getId());
         }
+    }
+
+    private boolean isAdminRole(UserType role) {
+        return role == UserType.STAFF || role == UserType.ADMINISTRATION;
     }
     
     /**

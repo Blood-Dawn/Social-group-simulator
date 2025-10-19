@@ -1,12 +1,19 @@
 package org.campusboard.sgs.Persistence;
 
 import org.campusboard.sgs.model.User;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.Base64;
+import java.util.Arrays;
 
 public class InMemoryUserRepository implements UserRepository {
     private final Map<UUID, User> users = new ConcurrentHashMap<>();
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     @Override
     public List<User> findAll() {

@@ -2,9 +2,10 @@ package org.campusboard.sgs.view;
 
 import javax.swing.*;
 import java.awt.*;
-import org.campusboard.sgs.controller.Controller;
 import org.campusboard.sgs.controller.AppEvent;
 import org.campusboard.sgs.controller.EventBus;
+import org.campusboard.sgs.controller.Controller;
+import org.campusboard.sgs.view.dialogs.LoginDialog;
 
 /**
  * Main application window - assembles all components together
@@ -120,11 +121,12 @@ public class MainWindow extends JFrame {
     /**
      * Show simple login prompt
      */
-    private void showLoginPrompt() {
-        System.out.println("🏠 MainWindow: Showing simple login prompt");
-        String username = JOptionPane.showInputDialog(this, "Enter username:");
-        if (username != null && !username.trim().isEmpty()) {
-            // controller.loginUser(username, "password"); // Method not implemented yet
+    public void showLoginPrompt() {
+        System.out.println("🏠 MainWindow: Showing login dialog");
+        if (controller.getCurrentUser() != null) {
+            return;
         }
+        LoginDialog dialog = new LoginDialog(this, controller);
+        dialog.setVisible(true);
     }
 }

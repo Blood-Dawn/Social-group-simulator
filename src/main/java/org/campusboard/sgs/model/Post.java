@@ -1,5 +1,8 @@
 package org.campusboard.sgs.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -8,6 +11,7 @@ import java.util.UUID;
  * Represents a post in the social group simulator.
  * Contains information such as title, body, likes, dislikes, and a unique identifier.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Post {
     private String title;
     private String body;
@@ -31,6 +35,26 @@ public class Post {
         this.category = category == null ? Category.GENERAL : category;
         // Ensure every post is constructed with a real author reference.
         this.author = Objects.requireNonNull(author, "Author cannot be null");
+    }
+
+    @JsonCreator
+    public Post(
+            @JsonProperty("id") UUID id,
+            @JsonProperty("title") String title,
+            @JsonProperty("body") String body,
+            @JsonProperty("category") Category category,
+            @JsonProperty("likes") int likes,
+            @JsonProperty("dislikes") int dislikes,
+            @JsonProperty("createdAt") LocalDateTime createdAt,
+            @JsonProperty("author") String author) {
+        this.title = title;
+        this.body = body;
+        this.id = id == null ? UUID.randomUUID() : id;
+        this.category = category == null ? Category.GENERAL : category;
+        this.likes = likes;
+        this.dislikes = dislikes;
+        this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
+        this.author = author;
     }
 
     // Getters

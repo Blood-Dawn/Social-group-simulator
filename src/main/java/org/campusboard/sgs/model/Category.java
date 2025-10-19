@@ -17,6 +17,7 @@ public enum Category {
     RECOMMENDED,         // Algorithm recommended (was Source.RECOMMENDED)
     
     // Student Services
+    CAMPUS_SERVICES,
     HOUSING,
     JOBS_INTERNSHIPS,
     BUY_SELL,
