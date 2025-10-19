@@ -80,8 +80,10 @@ public class PostCard extends JPanel {
         JPanel userInfo = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         userInfo.setOpaque(false);
 
-        String author = post.getAuthor();
-        String initial = author != null ? author.substring(0, 1).toUpperCase() : "?";
+        String authorHandle = post.getAuthorOrDefault();
+        // 2024-05-29: Leverage new Post#getAuthorOrDefault so cards always
+        // display the guest handle instead of falling back to "unknown".
+        String initial = authorHandle.isEmpty() ? "?" : authorHandle.substring(0, 1).toUpperCase();
         JLabel avatar = createCircularAvatar(initial);
         userInfo.add(avatar);
 
@@ -98,7 +100,7 @@ public class PostCard extends JPanel {
         textInfo.setLayout(new BoxLayout(textInfo, BoxLayout.Y_AXIS));
         textInfo.setOpaque(false);
         
-        JLabel username = new JLabel("@" + (author != null ? author : "unknown"));
+        JLabel username = new JLabel("@" + authorHandle);
         username.setFont(new Font("Arial", Font.BOLD, 13));
         username.setForeground(TEXT_PRIMARY);
         
