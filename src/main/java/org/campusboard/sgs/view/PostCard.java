@@ -73,6 +73,7 @@ public class PostCard extends JPanel {
         JPanel userInfo = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         userInfo.setOpaque(false);
         
+        // The post always carries a User author; render their identity details directly.
         User author = post.getAuthor();
         String usernameValue = extractUsername(author);
         String displayNameValue = extractDisplayName(author);

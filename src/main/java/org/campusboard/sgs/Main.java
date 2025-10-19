@@ -25,6 +25,7 @@ public class Main {
     }
 
     private static void seedDemoData(Controller controller, PostRepository postRepo, UserRepository userRepo) {
+        // Pre-seeded users ensure demo posts have persistent author references for the UI.
         User admin = new User("admin", "admin@fau.edu", "Campus Admin", UserType.STAFF);
         User john = new User("john_doe", "john.doe@fau.edu", "John Doe", UserType.STUDENT);
         User athleticsClub = new User("sports_fan", "athletics@fau.edu", "Owls Athletics", UserType.CLUB);

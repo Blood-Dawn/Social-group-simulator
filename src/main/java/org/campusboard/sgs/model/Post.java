@@ -16,6 +16,7 @@ public class Post {
     private UUID id;
     private Category category;
     private LocalDateTime createdAt;
+    // Store a concrete User so posts always have traceable ownership information.
     private User author;
 
     public Post(String title, String body, User author) {
@@ -28,6 +29,7 @@ public class Post {
         this.id = UUID.randomUUID();
         this.createdAt = LocalDateTime.now();
         this.category = category == null ? Category.GENERAL : category;
+        // Ensure every post is constructed with a real author reference.
         this.author = Objects.requireNonNull(author, "Author cannot be null");
     }
 
@@ -47,6 +49,7 @@ public class Post {
     public void setLikes(int likes) { this.likes = likes; }
     public void setCategory(Category category) { this.category = category; }
     public void setAuthor(User author) {
+        // Setter also defends against null assignments to keep ownership intact.
         this.author = Objects.requireNonNull(author, "Author cannot be null");
     }
 }

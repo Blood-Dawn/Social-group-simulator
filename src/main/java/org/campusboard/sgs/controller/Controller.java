@@ -14,6 +14,7 @@ public class Controller {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private User currentUser;
+    // Persisted guest account ensures anonymous posts still resolve to a concrete user.
     private final User guestUser;
     private Category activeFilter;
     private String searchQuery = "";
@@ -38,6 +39,7 @@ public class Controller {
             throw new IllegalArgumentException("Body cannot be empty");
         }
 
+        // Always attach either the logged-in user or the shared guest account when persisting posts.
         Post post = new Post(title.trim(), body.trim(), category, resolveAuthor());
 
         postRepository.save(post);
@@ -165,6 +167,7 @@ public class Controller {
     }
 
     private User resolveAuthor() {
+        // Fall back to the guest user so repository writes never encounter null authors.
         return currentUser != null ? currentUser : guestUser;
     }
 
