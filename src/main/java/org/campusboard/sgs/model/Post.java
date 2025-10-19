@@ -19,8 +19,15 @@ public class Post {
     private UUID id;
     private Category category;
     private LocalDateTime createdAt;
-    private String author; 
+    private String author;
     // TODO: Change to User object when User class is implemented
+
+    /**
+     * Centralized handle used when a post comes from an unauthenticated guest.
+     * Added on 2024-05-29 alongside Controller safeguards so feed items never
+     * render as "unknown" again when guests share announcements.
+     */
+    public static final String GUEST_AUTHOR_FALLBACK = "guest";
 
     public Post(String title, String body) {
         this.title = title;
@@ -65,6 +72,15 @@ public class Post {
     public Category getCategory() { return category; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public String getAuthor() { return author; }
+
+    /**
+     * Helper added on 2024-05-29 to guarantee UI consumers always receive a
+     * non-empty handle. This pairs with the guest fallback constant above and
+     * allows components like {@code PostCard} to drop their "unknown" branch.
+     */
+    public String getAuthorOrDefault() {
+        return (author == null || author.isBlank()) ? GUEST_AUTHOR_FALLBACK : author;
+    }
     
     public int getDislikes() { return dislikes; }
     public int getLikes() { return likes; }

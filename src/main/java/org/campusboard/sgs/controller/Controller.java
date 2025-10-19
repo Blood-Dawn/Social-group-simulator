@@ -19,6 +19,13 @@ public class Controller {
     private Category activeFilter;
     private String searchQuery = "";
 
+    /**
+     * 2024-05-29 Update: unified guest attribution string so posts created
+     * without an authenticated account land in the feed as "@guest" instead of
+     * the old "@unknown" placeholder.
+     */
+    private static final String DEFAULT_GUEST_HANDLE = Post.GUEST_AUTHOR_FALLBACK;
+
     public Controller(PostRepository postRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
@@ -39,9 +46,9 @@ public class Controller {
         }
 
         Post post = new Post(title.trim(), body.trim(), category == null ? Category.GENERAL : category);
-        if (currentUser != null) {
-            post.setAuthor(currentUser.getUsername());
-        }
+        // 2024-05-29: Always stamp the author so guest posts adopt the
+        // standardized handle established in Post.GUEST_AUTHOR_FALLBACK.
+        post.setAuthor(currentUser != null ? currentUser.getUsername() : DEFAULT_GUEST_HANDLE);
 
         postRepository.save(post);
         EventBus.publish(AppEvent.POST_CREATED, post);
