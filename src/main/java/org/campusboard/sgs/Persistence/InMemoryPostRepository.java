@@ -25,17 +25,20 @@ public class InMemoryPostRepository implements PostRepository {
 
     @Override
     public Post save(Post post) {
+        Objects.requireNonNull(post, "Post cannot be null");
+        Objects.requireNonNull(post.getAuthor(), "Post author cannot be null");
         posts.put(post.getId(), post);
         return post;
     }
 
     @Override
     public Post update(Post post) {
-        if (posts.containsKey(post.getId())) {
-            posts.put(post.getId(), post);
-            return post;
+        if (post == null || post.getId() == null || !posts.containsKey(post.getId())) {
+            return null; // Post doesn't exist
         }
-        return null; // Post doesn't exist
+        Objects.requireNonNull(post.getAuthor(), "Post author cannot be null");
+        posts.put(post.getId(), post);
+        return post;
     }
 
     @Override
