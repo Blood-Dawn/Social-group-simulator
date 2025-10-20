@@ -1,6 +1,15 @@
+# Recent Changes
+
+**Bloodawn**
+
+## 2025-10-19 - Blood-Dawn
+- Enforced non-null `User` authors for every `Post` instance and documented the invariants in code comments.
+- Updated controller logic to always attach the active user or a persisted guest account before saving posts.
+- Guarded repository writes against null authors and refreshed seeded demo users so UI cards always resolve an identity.
+- Enhanced `PostCard` rendering to assume author presence and explain the rationale for the identity display logic.
 # Recent Changes Digest
 
-_Last updated: 2024-05-29_
+## Last updated: 2025-10-19
 
 ## 1. Guest posts now display a real handle instead of `@unknown`
 - **What changed:** Added a controller-level fallback so every new post is stamped with a username, even when no one is logged in.

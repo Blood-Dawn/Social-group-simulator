@@ -16,6 +16,8 @@ public class Controller {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private User currentUser;
+    // Persisted guest account ensures anonymous posts still resolve to a concrete user.
+    private final User guestUser;
     private Category activeFilter;
     private String searchQuery = "";
 
@@ -29,6 +31,7 @@ public class Controller {
     public Controller(PostRepository postRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.guestUser = initializeGuestUser();
     }
     
     // ============ POST MANAGEMENT ============
@@ -45,10 +48,8 @@ public class Controller {
             throw new IllegalArgumentException("Body cannot be empty");
         }
 
-        Post post = new Post(title.trim(), body.trim(), category == null ? Category.GENERAL : category);
-        // 2024-05-29: Always stamp the author so guest posts adopt the
-        // standardized handle established in Post.GUEST_AUTHOR_FALLBACK.
-        post.setAuthor(currentUser != null ? currentUser.getUsername() : DEFAULT_GUEST_HANDLE);
+        // Always attach either the logged-in user or the shared guest account when persisting posts.
+        Post post = new Post(title.trim(), body.trim(), category, resolveAuthor());
 
         postRepository.save(post);
         EventBus.publish(AppEvent.POST_CREATED, post);
@@ -218,6 +219,17 @@ public class Controller {
             setCurrentUser(null);
             EventBus.publish(AppEvent.USER_LOGGED_OUT);
         }
+    }
+
+    private User initializeGuestUser() {
+        return userRepository.findByUsername("guest")
+                .orElseGet(() -> userRepository.save(
+                        new User("guest", "guest@campusboard.local", "Guest", UserType.GUEST)));
+    }
+
+    private User resolveAuthor() {
+        // Fall back to the guest user so repository writes never encounter null authors.
+        return currentUser != null ? currentUser : guestUser;
     }
 
     public void performSearch(String query) {

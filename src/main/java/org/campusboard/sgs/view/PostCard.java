@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.Duration;
 import org.campusboard.sgs.controller.Controller;
 import org.campusboard.sgs.model.Post;
-import org.campusboard.sgs.model.UserType;
+import org.campusboard.sgs.model.User;
 
 /**
  * Individual post card component with modern design
@@ -79,35 +79,34 @@ public class PostCard extends JPanel {
         // LEFT - Avatar + User info
         JPanel userInfo = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         userInfo.setOpaque(false);
-
-        String authorHandle = post.getAuthorOrDefault();
-        // 2024-05-29: Leverage new Post#getAuthorOrDefault so cards always
-        // display the guest handle instead of falling back to "unknown".
-        String initial = authorHandle.isEmpty() ? "?" : authorHandle.substring(0, 1).toUpperCase();
-        JLabel avatar = createCircularAvatar(initial);
+        
+        // The post always carries a User author; render their identity details directly.
+        User author = post.getAuthor();
+        String usernameValue = extractUsername(author);
+        String displayNameValue = extractDisplayName(author);
+        JLabel avatar = createCircularAvatar(extractInitial(author));
+        avatar.setToolTipText(displayNameValue != null ? displayNameValue : "@" + usernameValue);
         userInfo.add(avatar);
 
-        adminBadge = new JLabel("ADMIN");
-        adminBadge.setFont(new Font("Arial", Font.BOLD, 11));
-        adminBadge.setForeground(new Color(120, 70, 0));
-        adminBadge.setBackground(new Color(255, 231, 179));
-        adminBadge.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
-        adminBadge.setOpaque(true);
-        adminBadge.setVisible(false);
-        userInfo.add(adminBadge);
-        
         JPanel textInfo = new JPanel();
         textInfo.setLayout(new BoxLayout(textInfo, BoxLayout.Y_AXIS));
         textInfo.setOpaque(false);
-        
-        JLabel username = new JLabel("@" + authorHandle);
-        username.setFont(new Font("Arial", Font.BOLD, 13));
-        username.setForeground(TEXT_PRIMARY);
-        
+
+        if (displayNameValue != null) {
+            JLabel displayName = new JLabel(displayNameValue);
+            displayName.setFont(new Font("Arial", Font.BOLD, 14));
+            displayName.setForeground(TEXT_PRIMARY);
+            textInfo.add(displayName);
+        }
+
+        JLabel username = new JLabel("@" + usernameValue);
+        username.setFont(new Font("Arial", displayNameValue != null ? Font.PLAIN : Font.BOLD, 12));
+        username.setForeground(TEXT_SECONDARY);
+
         JLabel timestamp = new JLabel(formatTimestamp(post.getCreatedAt()));
         timestamp.setFont(new Font("Arial", Font.PLAIN, 11));
         timestamp.setForeground(TEXT_SECONDARY);
-        
+
         textInfo.add(username);
         textInfo.add(timestamp);
         userInfo.add(textInfo);
@@ -196,7 +195,8 @@ public class PostCard extends JPanel {
      * Uses custom paintComponent for smooth circle
      */
     private JLabel createCircularAvatar(String initial) {
-        JLabel avatar = new JLabel(initial) {
+        final String safeInitial = extractInitial(initial);
+        JLabel avatar = new JLabel(safeInitial) {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -208,7 +208,7 @@ public class PostCard extends JPanel {
                 FontMetrics fm = g2.getFontMetrics();
                 int x = (getWidth() - fm.stringWidth(getText())) / 2;
                 int y = ((getHeight() - fm.getHeight()) / 2) + fm.getAscent();
-                g2.drawString(getText(), x, y);
+                g2.drawString(safeInitial, x, y);
                 g2.dispose();
             }
         };
@@ -379,5 +379,39 @@ public class PostCard extends JPanel {
             }
         }
         return result.toString().trim();
+    }
+
+    private String extractUsername(User author) {
+        if (author == null || author.getUsername() == null || author.getUsername().isBlank()) {
+            return "guest";
+        }
+        return author.getUsername();
+    }
+
+    private String extractDisplayName(User author) {
+        if (author == null) {
+            return null;
+        }
+        String displayName = author.getDisplayName();
+        return (displayName == null || displayName.isBlank()) ? null : displayName;
+    }
+
+    private String extractInitial(User author) {
+        String source = null;
+        if (author != null) {
+            if (author.getDisplayName() != null && !author.getDisplayName().isBlank()) {
+                source = author.getDisplayName();
+            } else if (author.getUsername() != null && !author.getUsername().isBlank()) {
+                source = author.getUsername();
+            }
+        }
+        return extractInitial(source);
+    }
+
+    private String extractInitial(String value) {
+        if (value == null || value.isBlank()) {
+            return "?";
+        }
+        return value.substring(0, 1).toUpperCase();
     }
 }

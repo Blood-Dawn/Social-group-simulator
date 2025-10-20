@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -19,30 +20,21 @@ public class Post {
     private UUID id;
     private Category category;
     private LocalDateTime createdAt;
-    private String author;
-    // TODO: Change to User object when User class is implemented
+    // Store a concrete User so posts always have traceable ownership information.
+    private User author;
 
-    /**
-     * Centralized handle used when a post comes from an unauthenticated guest.
-     * Added on 2024-05-29 alongside Controller safeguards so feed items never
-     * render as "unknown" again when guests share announcements.
-     */
-    public static final String GUEST_AUTHOR_FALLBACK = "guest";
-
-    public Post(String title, String body) {
-        this.title = title;
-        this.body = body;
-        this.id = UUID.randomUUID();
-        this.createdAt = LocalDateTime.now();
-        this.category = Category.GENERAL; // default category
+    public Post(String title, String body, User author) {
+        this(title, body, Category.GENERAL, author);
     }
 
-    public Post(String title, String body, Category category) {
+    public Post(String title, String body, Category category, User author) {
         this.title = title;
         this.body = body;
         this.id = UUID.randomUUID();
         this.createdAt = LocalDateTime.now();
-        this.category = category;
+        this.category = category == null ? Category.GENERAL : category;
+        // Ensure every post is constructed with a real author reference.
+        this.author = Objects.requireNonNull(author, "Author cannot be null");
     }
 
     @JsonCreator
@@ -71,16 +63,7 @@ public class Post {
     public UUID getId() { return id; }
     public Category getCategory() { return category; }
     public LocalDateTime getCreatedAt() { return createdAt; }
-    public String getAuthor() { return author; }
-
-    /**
-     * Helper added on 2024-05-29 to guarantee UI consumers always receive a
-     * non-empty handle. This pairs with the guest fallback constant above and
-     * allows components like {@code PostCard} to drop their "unknown" branch.
-     */
-    public String getAuthorOrDefault() {
-        return (author == null || author.isBlank()) ? GUEST_AUTHOR_FALLBACK : author;
-    }
+    public User getAuthor() { return author; }
     
     public int getDislikes() { return dislikes; }
     public int getLikes() { return likes; }
@@ -89,6 +72,8 @@ public class Post {
     public void setDislikes(int dislikes) { this.dislikes = dislikes; }
     public void setLikes(int likes) { this.likes = likes; }
     public void setCategory(Category category) { this.category = category; }
-    public void setAuthor(String author) { this.author = author; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setAuthor(User author) {
+        // Setter also defends against null assignments to keep ownership intact.
+        this.author = Objects.requireNonNull(author, "Author cannot be null");
+    }
 }
