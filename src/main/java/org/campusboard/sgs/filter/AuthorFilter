@@ -1,0 +1,29 @@
+package org.campusboard.sgs.filter;
+
+import org.campusboard.sgs.model.Post;
+import org.campusboard.sgs.model.User;
+import java.util.*;
+
+public class AuthorFilter implements FilterStrategy {
+    private final String needle;
+
+    public AuthorFilter(String authorContains) {
+        this.needle = authorContains == null ? "" : authorContains.trim().toLowerCase();
+    }
+
+    @Override public List<Post> apply(List<Post> input) {
+        if (needle.length() == 0) return new ArrayList<Post>();
+        List<Post> out = new ArrayList<Post>();
+        for (int i = 0; i < input.size(); i++) {
+            Post p = input.get(i);
+            User u = p.getAuthor();
+            String name = u == null ? "" :
+                ((u.getDisplayName() != null && u.getDisplayName().length() > 0)
+                    ? u.getDisplayName() : (u.getUsername() != null ? u.getUsername() : ""));
+            if (name.toLowerCase().indexOf(needle) >= 0) out.add(p);
+        }
+        return out;
+    }
+
+    @Override public String getName() { return "Author(" + needle + ")"; }
+}

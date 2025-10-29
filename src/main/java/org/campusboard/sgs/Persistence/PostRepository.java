@@ -1,4 +1,4 @@
-package org.campusboard.sgs.Persistence;
+package org.campusboard.sgs.persistence;
 
 import org.campusboard.sgs.model.Post;
 import java.util.*;

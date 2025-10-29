@@ -1,0 +1,17 @@
+package org.campusboard.sgs.filter;
+
+import org.campusboard.sgs.model.Post;
+import java.util.*;
+
+public class SortByNew implements FilterStrategy {
+    @Override public List<Post> apply(List<Post> input) {
+        List<Post> copy = new ArrayList<Post>(input);
+        Collections.sort(copy, new Comparator<Post>() {
+            @Override public int compare(Post a, Post b) {
+                return b.getCreatedAt().compareTo(a.getCreatedAt());
+            }
+        });
+        return copy;
+    }
+    @Override public String getName() { return "SortByNew"; }
+}

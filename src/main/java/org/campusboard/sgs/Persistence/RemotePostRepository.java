@@ -1,4 +1,4 @@
-package org.campusboard.sgs.Persistence;
+package org.campusboard.sgs.persistence;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

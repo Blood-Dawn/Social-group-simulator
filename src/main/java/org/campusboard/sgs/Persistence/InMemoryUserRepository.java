@@ -1,4 +1,4 @@
-package org.campusboard.sgs.Persistence;
+package org.campusboard.sgs.persistence;
 
 import org.campusboard.sgs.model.User;
 import java.nio.charset.StandardCharsets;
@@ -78,5 +78,17 @@ public class InMemoryUserRepository implements UserRepository {
         }
         user.setActive(false);
         return true;
+    }
+
+    @Override
+    public void assignPassword(User user, char[] password) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'assignPassword'");
+    }
+
+    @Override
+    public boolean validatePassword(User user, char[] password) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'validatePassword'");
     }
 }

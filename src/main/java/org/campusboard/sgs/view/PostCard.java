@@ -8,6 +8,7 @@ import java.time.Duration;
 import org.campusboard.sgs.controller.Controller;
 import org.campusboard.sgs.model.Post;
 import org.campusboard.sgs.model.User;
+import org.campusboard.sgs.model.UserType;
 
 /**
  * Individual post card component with modern design

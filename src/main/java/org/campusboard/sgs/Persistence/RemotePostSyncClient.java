@@ -1,4 +1,4 @@
-package org.campusboard.sgs.Persistence;
+package org.campusboard.sgs.persistence;
 
 import java.time.Duration;
 import java.util.Objects;

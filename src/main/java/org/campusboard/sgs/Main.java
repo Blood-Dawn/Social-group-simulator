@@ -7,7 +7,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import org.campusboard.sgs.Persistence.*;
+import org.campusboard.sgs.persistence.*;
 import org.campusboard.sgs.controller.*;
 import org.campusboard.sgs.model.*;
 import org.campusboard.sgs.view.MainWindow;
@@ -44,7 +44,7 @@ public class Main {
             UserRepository userRepo = new InMemoryUserRepository();
             Controller controller = new Controller(postRepo, userRepo);
 
-            seedDemoData(postRepo, userRepo);
+            seedDemoData(controller, postRepo, userRepo);
 
             MainWindow mainWindow = new MainWindow(controller);
             if (syncClient != null) {

@@ -1,8 +1,8 @@
 package org.campusboard.sgs.controller;
 
 import org.campusboard.sgs.model.*;
-import org.campusboard.sgs.Persistence.PostRepository;
-import org.campusboard.sgs.Persistence.UserRepository;
+import org.campusboard.sgs.persistence.PostRepository;
+import org.campusboard.sgs.persistence.UserRepository;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
