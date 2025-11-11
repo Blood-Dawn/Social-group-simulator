@@ -133,7 +133,7 @@ public class SidebarPanel extends JPanel {
         userLabel.setText("<html><b>Logged in as:</b><br>" +
                          user.username() + " (" + user.role() + ")</html>");
       } else {
-        userLabel.setText("<html><b>Guest mode (test)</b><br>" +
+        userLabel.setText("<html><b>Guest mode</b><br>" +
                          "Login to access<br>full features</html>");
       }
     });

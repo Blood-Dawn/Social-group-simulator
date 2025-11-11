@@ -71,14 +71,14 @@ public class MainWindow extends JFrame {
 
     // Post menu
     JMenu postMenu = new JMenu("Post");
-    JMenuItem createPostItem = new JMenuItem("Create Post (test)");
+    JMenuItem createPostItem = new JMenuItem("Create Post");
     createPostItem.setAccelerator(KeyStroke.getKeyStroke("control N"));
     createPostItem.addActionListener(e -> showCreatePostDialog());
     postMenu.add(createPostItem);
     menuBar.add(postMenu);
 
     // Admin menu (initially hidden)
-    adminMenu = new JMenu("Admin (test)");
+    adminMenu = new JMenu("Admin");
     JMenuItem manageUsersItem = new JMenuItem("Manage Users");
     manageUsersItem.addActionListener(e ->
         ManageUsersDialog.showDialog(this, userRepo, bus));
@@ -146,8 +146,7 @@ public class MainWindow extends JFrame {
   private void showAboutDialog() {
     JOptionPane.showMessageDialog(this,
         "CampusBoard\nVersion 1.0\n\n" +
-        "A social posting system for campus communities\n\n" +
-        "(test) markers indicate acceptance test points",
+        "A social posting system for campus communities",
         "About CampusBoard",
         JOptionPane.INFORMATION_MESSAGE);
   }

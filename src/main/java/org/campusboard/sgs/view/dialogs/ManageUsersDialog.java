@@ -15,7 +15,7 @@ public class ManageUsersDialog extends JDialog {
   private DefaultTableModel tableModel;
 
   public ManageUsersDialog(Frame owner, UserRepository userRepo, EventBus bus) {
-    super(owner, "Manage Users (test)", true);
+    super(owner, "Manage Users", true);
     this.userRepo = userRepo;
     this.bus = bus;
 

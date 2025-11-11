@@ -15,7 +15,6 @@ public class InMemoryPostRepository implements PostRepository {
     save(new Post(null,"Study Group for COP3330","Meet Fri 18:00, library 2F.", Category.STUDY_GROUPS,"stud01"));
     save(new Post(null,"Lost Backpack","Blue Jansport near CS building.", Category.LOST_FOUND,"stud01"));
     save(new Post(null,"Basketball Game Tonight!","Gym at 20:00; bring ID.", Category.EVENTS,"staff01"));
-    save(new Post(null,"test","(test) seeded card", Category.ANNOUNCEMENTS,"admin"));
   }
 
   @Override public List<Post> findAll() { return new ArrayList<>(map.values()); }

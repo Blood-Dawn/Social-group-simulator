@@ -15,7 +15,7 @@ public class ModeratePostsDialog extends JDialog {
   private DefaultTableModel tableModel;
 
   public ModeratePostsDialog(Frame owner, PostController postController, EventBus bus) {
-    super(owner, "Moderate Posts (test)", true);
+    super(owner, "Moderate Posts", true);
     this.postController = postController;
     this.bus = bus;
 

@@ -98,7 +98,7 @@ public class TopBar extends JPanel {
     authPanel.setOpaque(false);
 
     // Login button
-    loginButton = new JButton("Login (test)");
+    loginButton = new JButton("Login");
     loginButton.setFont(new Font("Arial", Font.BOLD, 13));
     loginButton.setForeground(Color.WHITE);
     loginButton.setBackground(FAU_RED);

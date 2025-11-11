@@ -13,7 +13,7 @@ public class CreatePostDialog extends JDialog {
   private boolean success = false;
 
   public CreatePostDialog(Frame owner, PostController controller) {
-    super(owner, "Create Post (test)", true);
+    super(owner, "Create Post", true);
     this.controller = controller;
 
     setLayout(new BorderLayout(10, 10));

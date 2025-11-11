@@ -12,7 +12,7 @@ public class ViewReportsDialog extends JDialog {
   private final PostController postController;
 
   public ViewReportsDialog(Frame owner, PostController postController) {
-    super(owner, "View Reports (test)", true);
+    super(owner, "View Reports", true);
     this.postController = postController;
 
     setLayout(new BorderLayout(10, 10));
