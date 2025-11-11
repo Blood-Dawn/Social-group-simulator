@@ -77,20 +77,39 @@ src/main/java/org/campusboard/sgs/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Java 11 or higher
-- Gradle 7.0 or higher
+- Java 17 or higher (with toolchain support)
+- Gradle 7.0 or higher (wrapper included)
 
 ### Building the Project
 ```bash
-./gradlew build
+./gradlew clean build
 ```
+
+This will:
+- Compile all source code
+- Run the test suite
+- Generate JaCoCo coverage report at `build/reports/jacoco/test/html`
 
 ### Running the Application
 ```bash
 ./gradlew run
 ```
 
-Currently shows a "Coming Soon" window until implementation is complete.
+The application will launch with seeded demo data including:
+- 12 sample posts across various categories
+- 4 demo user accounts (admin, students, club)
+- Login dialog on startup
+
+### Running Tests
+```bash
+./gradlew test
+```
+
+View coverage report:
+```bash
+./gradlew jacocoTestReport
+open build/reports/jacoco/test/html/index.html
+```
 
 ### Demo Login Credentials
 The in-memory seed data provides the following accounts for local testing:
@@ -106,33 +125,25 @@ The in-memory seed data provides the following accounts for local testing:
 
 ## 📋 Implementation Status
 
-### ✅ Complete (Framework)
-- [x] All class structures and interfaces
-- [x] Method signatures with comprehensive TODOs
-- [x] Event system architecture
-- [x] Repository pattern setup
-- [x] UI component structure
-- [x] Category and user type enums
+### ✅ MVP Complete
+- [x] Full repository layer (InMemoryPostRepository, InMemoryUserRepository)
+- [x] Controller with business logic
+- [x] EventBus with comprehensive event types
+- [x] Command pattern with UndoManager
+- [x] Filter strategies (AllFilter, CategoryFilter, TrendingFilter, AuthorTypeFilter)
+- [x] Complete Swing UI (MainWindow, TopBar, Sidebar, Feed, PostCard, Dialogs)
+- [x] Authentication system
+- [x] Search and filtering
+- [x] Undo/redo for create/edit/delete/like operations
+- [x] Comprehensive test suite (Repository, Controller, Filters, EventBus)
+- [x] CI/CD with GitHub Actions
+- [x] JaCoCo coverage reporting
 
-### 🚧 In Progress (Implementation Needed)
-See [TODO.md](TODO.md) for detailed implementation tasks (~35 TODO items)
-
-#### High Priority
-- [ ] Repository method implementations
-- [ ] Controller business logic
-- [ ] UI component implementations
-- [ ] Event handling wiring
-
-#### Medium Priority  
-- [ ] Authentication system
-- [ ] Search functionality
-- [ ] Advanced filtering
-- [ ] Command pattern for undo/redo
-
-#### Low Priority
-- [ ] UI polish and styling
-- [ ] Campus-specific features
-- [ ] Validation and error handling
+### 🔜 Next
+- [ ] SQLite persistence layer (SqlitePostRepository)
+- [ ] UI polish and theming
+- [ ] Additional filters and sorting options
+- [ ] Performance optimizations
 
 ## 🎓 Campus-Specific Features
 

@@ -3,10 +3,12 @@ package org.campusboard.sgs.controller;
 import org.campusboard.sgs.model.*;
 import org.campusboard.sgs.Persistence.PostRepository;
 import org.campusboard.sgs.Persistence.UserRepository;
+import org.campusboard.sgs.filter.FilterStrategy;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.UnaryOperator;
 
 /**
  * Main controller for the campus board application.
@@ -15,10 +17,12 @@ import java.util.UUID;
 public class Controller {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final UndoManager undoManager;
     private User currentUser;
     // Persisted guest account ensures anonymous posts still resolve to a concrete user.
     private final User guestUser;
     private Category activeFilter;
+    private FilterStrategy filterStrategy;
     private String searchQuery = "";
 
     /**
@@ -31,6 +35,7 @@ public class Controller {
     public Controller(PostRepository postRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.undoManager = new UndoManager();
         this.guestUser = initializeGuestUser();
     }
     
@@ -275,5 +280,150 @@ public class Controller {
 
     private boolean containsIgnoreCase(String value, String query) {
         return value != null && value.toLowerCase().contains(query);
+    }
+
+    // ============ UNDO/REDO SUPPORT ============
+
+    /**
+     * Create a post with undo support
+     */
+    public void createPostWithUndo(String title, String body, Category category) {
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Title cannot be empty");
+        }
+        if (body == null || body.trim().isEmpty()) {
+            throw new IllegalArgumentException("Body cannot be empty");
+        }
+
+        CreatePostCommand cmd = new CreatePostCommand(postRepository, title.trim(), body.trim(), category, resolveAuthor());
+        try {
+            undoManager.doCommand(cmd);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create post", e);
+        }
+    }
+
+    /**
+     * Edit a post with undo support
+     */
+    public void editPostWithUndo(UUID postId, UnaryOperator<Post> updater) {
+        if (postId == null) {
+            throw new IllegalArgumentException("Post ID cannot be null");
+        }
+
+        EditPostCommand cmd = new EditPostCommand(postRepository, postId, updater);
+        try {
+            undoManager.doCommand(cmd);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to edit post", e);
+        }
+    }
+
+    /**
+     * Delete a post with undo support
+     */
+    public void deletePostWithUndo(UUID postId) {
+        if (postId == null) {
+            throw new IllegalArgumentException("Post ID cannot be null");
+        }
+
+        DeletePostCommand cmd = new DeletePostCommand(postRepository, postId);
+        try {
+            undoManager.doCommand(cmd);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete post", e);
+        }
+    }
+
+    /**
+     * Like a post with undo support
+     */
+    public void likePostWithUndo(UUID postId) {
+        if (postId == null) {
+            throw new IllegalArgumentException("Post ID cannot be null");
+        }
+
+        LikePostCommand cmd = new LikePostCommand(postRepository, postId);
+        try {
+            undoManager.doCommand(cmd);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to like post", e);
+        }
+    }
+
+    /**
+     * Undo the last command
+     */
+    public void undo() {
+        try {
+            undoManager.undo();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to undo", e);
+        }
+    }
+
+    /**
+     * Redo the last undone command
+     */
+    public void redo() {
+        try {
+            undoManager.redo();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to redo", e);
+        }
+    }
+
+    /**
+     * Check if undo is available
+     */
+    public boolean canUndo() {
+        return undoManager.canUndo();
+    }
+
+    /**
+     * Check if redo is available
+     */
+    public boolean canRedo() {
+        return undoManager.canRedo();
+    }
+
+    // ============ FILTER STRATEGY SUPPORT ============
+
+    /**
+     * Set the filter strategy
+     */
+    public void setFilter(FilterStrategy strategy) {
+        this.filterStrategy = strategy;
+        EventBus.publish(AppEvent.FILTER_CHANGED, strategy);
+        EventBus.publish(AppEvent.POSTS_CHANGED);
+    }
+
+    /**
+     * Get filtered posts using the current FilterStrategy and search query
+     */
+    public List<Post> getFiltered() {
+        List<Post> posts = postRepository.findAll();
+        posts.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+
+        // Apply filter strategy if set
+        if (filterStrategy != null) {
+            posts = filterStrategy.apply(posts);
+        }
+
+        // Apply search query
+        if (searchQuery != null && !searchQuery.isBlank()) {
+            String query = searchQuery.toLowerCase();
+            posts.removeIf(post -> !containsIgnoreCase(post.getTitle(), query)
+                    && !containsIgnoreCase(post.getBody(), query));
+        }
+
+        return posts;
+    }
+
+    /**
+     * Get the EventBus instance for subscriptions
+     */
+    public EventBus getBus() {
+        return new EventBus();
     }
 }

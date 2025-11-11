@@ -72,6 +72,8 @@ public class Post {
     public void setDislikes(int dislikes) { this.dislikes = dislikes; }
     public void setLikes(int likes) { this.likes = likes; }
     public void setCategory(Category category) { this.category = category; }
+    public void setTitle(String title) { this.title = title; }
+    public void setBody(String body) { this.body = body; }
     public void setAuthor(User author) {
         // Setter also defends against null assignments to keep ownership intact.
         this.author = Objects.requireNonNull(author, "Author cannot be null");
