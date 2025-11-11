@@ -1,48 +1,7 @@
-plugins {
-    id 'java'
-    id 'application'
-    id 'jacoco'
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
-application {
-    mainClass = 'org.campusboard.sgs.Main'
-}
-
-repositories {
-    mavenCentral()
-}
-
+plugins { id 'java'; id 'application' }
+repositories { mavenCentral() }
 dependencies {
-    // Existing Jackson dependencies
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1'
-
-    // JUnit 5 - updated version
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
-
-    // AssertJ for fluent assertions
-    testImplementation 'org.assertj:assertj-core:3.26.0'
-
-    // AssertJ Swing for UI testing (optional)
-    testImplementation 'org.assertj:assertj-swing-junit:3.17.1'
-
-    // SQLite for future persistence
-    implementation 'org.xerial:sqlite-jdbc:3.45.3.0'
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
 }
-
-test {
-    useJUnitPlatform()
-}
-
-jacocoTestReport {
-    dependsOn test
-    reports {
-        html.required = true
-        xml.required = true
-    }
-}
+application { mainClass = 'org.campusboard.sgs.Main' }
+test { useJUnitPlatform() }

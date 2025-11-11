@@ -1,81 +1,41 @@
 package org.campusboard.sgs.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
 
-/**
- * Represents a post in the social group simulator.
- * Contains information such as title, body, likes, dislikes, and a unique identifier.
- */
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class Post {
-    private String title;
-    private String body;
-    private int dislikes;
-    private int likes;
-    private UUID id;
-    private Category category;
-    private LocalDateTime createdAt;
-    // Store a concrete User so posts always have traceable ownership information.
-    private User author;
+public final class Post {
+  private final UUID id;
+  private String title;
+  private String body;
+  private Category category;
+  private final String author;         // username
+  private final Instant createdAt;
+  private Instant updatedAt;
+  private final Set<String> likedBy = new HashSet<>();
 
-    public Post(String title, String body, User author) {
-        this(title, body, Category.GENERAL, author);
-    }
+  public Post(UUID id, String title, String body, Category cat, String author) {
+    this.id = id == null ? UUID.randomUUID() : id;
+    this.title = title;
+    this.body = body;
+    this.category = cat;
+    this.author = author;
+    this.createdAt = Instant.now();
+    this.updatedAt = createdAt;
+  }
+  public UUID id() { return id; }
+  public String title() { return title; }
+  public String body() { return body; }
+  public Category category() { return category; }
+  public String author() { return author; }
+  public int likeCount() { return likedBy.size(); }
+  public boolean isLikedBy(String userId) { return likedBy.contains(userId); }
 
-    public Post(String title, String body, Category category, User author) {
-        this.title = title;
-        this.body = body;
-        this.id = UUID.randomUUID();
-        this.createdAt = LocalDateTime.now();
-        this.category = category == null ? Category.GENERAL : category;
-        // Ensure every post is constructed with a real author reference.
-        this.author = Objects.requireNonNull(author, "Author cannot be null");
-    }
-
-    @JsonCreator
-    public Post(
-            @JsonProperty("id") UUID id,
-            @JsonProperty("title") String title,
-            @JsonProperty("body") String body,
-            @JsonProperty("category") Category category,
-            @JsonProperty("likes") int likes,
-            @JsonProperty("dislikes") int dislikes,
-            @JsonProperty("createdAt") LocalDateTime createdAt,
-            @JsonProperty("author") String author) {
-        this.title = title;
-        this.body = body;
-        this.id = id == null ? UUID.randomUUID() : id;
-        this.category = category == null ? Category.GENERAL : category;
-        this.likes = likes;
-        this.dislikes = dislikes;
-        this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
-        this.author = author;
-    }
-
-    // Getters
-    public String getTitle() { return title; }
-    public String getBody() { return body; }
-    public UUID getId() { return id; }
-    public Category getCategory() { return category; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public User getAuthor() { return author; }
-    
-    public int getDislikes() { return dislikes; }
-    public int getLikes() { return likes; }
-    
-    // Setters
-    public void setDislikes(int dislikes) { this.dislikes = dislikes; }
-    public void setLikes(int likes) { this.likes = likes; }
-    public void setCategory(Category category) { this.category = category; }
-    public void setTitle(String title) { this.title = title; }
-    public void setBody(String body) { this.body = body; }
-    public void setAuthor(User author) {
-        // Setter also defends against null assignments to keep ownership intact.
-        this.author = Objects.requireNonNull(author, "Author cannot be null");
-    }
+  public void edit(String title, String body, Category cat) {
+    this.title = title; this.body = body; this.category = cat; this.updatedAt = Instant.now();
+  }
+  /** Toggle like; returns true if now liked. */
+  public boolean toggleLike(String userId) {
+    if (likedBy.remove(userId)) return false;
+    likedBy.add(userId); return true;
+  }
 }
