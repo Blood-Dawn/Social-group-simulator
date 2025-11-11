@@ -1,0 +1,41 @@
+#!/bin/bash
+echo "=== Verifying Simplified Architecture ==="
+echo ""
+
+echo "✓ Checking for OLD files that should NOT exist..."
+! find src -name "Controller.java" -path "*/controller/Controller.java" 2>/dev/null | grep -q . && echo "  ✓ No old Controller.java" || echo "  ✗ FOUND old Controller.java"
+! find src -name "AppEvent.java" 2>/dev/null | grep -q . && echo "  ✓ No AppEvent.java" || echo "  ✗ FOUND AppEvent.java"  
+! find src -path "*/Persistence/*" 2>/dev/null | grep -q . && echo "  ✓ No Persistence/ package" || echo "  ✗ FOUND Persistence/ package"
+! find src -name "*Command.java" -path "*/controller/*" 2>/dev/null | grep -q . && echo "  ✓ No Command classes" || echo "  ✗ FOUND Command classes"
+! find src -name "UndoManager.java" 2>/dev/null | grep -q . && echo "  ✓ No UndoManager" || echo "  ✗ FOUND UndoManager"
+echo ""
+
+echo "✓ Checking for NEW files that SHOULD exist..."
+[ -f "src/main/java/org/campusboard/sgs/controller/PostController.java" ] && echo "  ✓ PostController.java exists" || echo "  ✗ MISSING PostController.java"
+[ -f "src/main/java/org/campusboard/sgs/controller/AuthController.java" ] && echo "  ✓ AuthController.java exists" || echo "  ✗ MISSING AuthController.java"
+[ -f "src/main/java/org/campusboard/sgs/util/Events.java" ] && echo "  ✓ util/Events.java exists" || echo "  ✗ MISSING Events.java"
+[ -f "src/main/java/org/campusboard/sgs/util/EventBus.java" ] && echo "  ✓ util/EventBus.java exists" || echo "  ✗ MISSING EventBus.java"
+[ -f "src/main/java/org/campusboard/sgs/util/Session.java" ] && echo "  ✓ util/Session.java exists" || echo "  ✗ MISSING Session.java"
+[ -f "src/main/java/org/campusboard/sgs/repo/PostRepository.java" ] && echo "  ✓ repo/PostRepository.java exists" || echo "  ✗ MISSING PostRepository.java"
+echo ""
+
+echo "✓ Checking imports..."
+grep -r "import.*Persistence" src/ 2>/dev/null && echo "  ✗ FOUND old Persistence imports" || echo "  ✓ No old Persistence imports"
+grep -r "import.*AppEvent" src/ 2>/dev/null && echo "  ✗ FOUND AppEvent imports" || echo "  ✓ No AppEvent imports"
+grep -r "Category.GENERAL\|Category.CLUBS_ORGS\|Category.LOST_AND_FOUND" src/ 2>/dev/null && echo "  ✗ FOUND incorrect Category values" || echo "  ✓ All Category values correct"
+echo ""
+
+echo "✓ Checking Category enum..."
+grep -A 1 "enum Category" src/main/java/org/campusboard/sgs/model/Category.java | grep -q "ANNOUNCEMENTS, STUDY_GROUPS, EVENTS, LOST_FOUND" && echo "  ✓ Category enum correct" || echo "  ✗ Category enum incorrect"
+echo ""
+
+echo "✓ Checking Post model..."
+grep -q "public boolean toggleLike(String userId)" src/main/java/org/campusboard/sgs/model/Post.java && echo "  ✓ Post.toggleLike() exists" || echo "  ✗ MISSING toggleLike()"
+grep -q "private final String author" src/main/java/org/campusboard/sgs/model/Post.java && echo "  ✓ Post uses String author" || echo "  ✗ Post author incorrect"
+echo ""
+
+echo "=== Verification Complete ==="
+echo ""
+echo "If all checks pass, the architecture is correct."
+echo "If build fails, ensure you have the latest code:"
+echo "  git pull origin claude/mvp-finish-implementation-011CV1cGPhfMdj8yDojMNsYF"
