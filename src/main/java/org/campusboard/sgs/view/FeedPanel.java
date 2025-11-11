@@ -16,7 +16,7 @@ public class FeedPanel extends JPanel {
   private final JScrollPane scroll;
   private final JPanel content = new JPanel();
   private final Map<UUID, PostCard> cards = new LinkedHashMap<>();
-  private final Timer debounce = new Timer(120, e -> doRefresh()); // EDT-safe debounce
+  private final javax.swing.Timer debounce = new javax.swing.Timer(120, e -> doRefresh()); // EDT-safe debounce
 
   public FeedPanel(PostController controller, EventBus bus){
     super(new BorderLayout());
@@ -26,10 +26,10 @@ public class FeedPanel extends JPanel {
     add(scroll, BorderLayout.CENTER);
 
     debounce.setRepeats(false); // classic debounce
-    bus.subscribe(Events.POSTS_REPLACED, _ -> schedule());
-    bus.subscribe(Events.POST_UPDATED, _ -> schedule());
-    bus.subscribe(Events.FILTER_CHANGED, _ -> schedule());
-    bus.subscribe(Events.SEARCH_CHANGED, _ -> schedule());
+    bus.subscribe(Events.POSTS_REPLACED, e -> schedule());
+    bus.subscribe(Events.POST_UPDATED, e -> schedule());
+    bus.subscribe(Events.FILTER_CHANGED, e -> schedule());
+    bus.subscribe(Events.SEARCH_CHANGED, e -> schedule());
     schedule();
   }
 
