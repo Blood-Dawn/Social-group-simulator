@@ -1,4 +1,8 @@
-plugins { id 'java'; id 'application' }
+plugins {
+    id 'java'
+    id 'application'
+    id 'jacoco'
+}
 repositories { mavenCentral() }
 dependencies {
     // Existing Jackson dependencies
