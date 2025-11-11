@@ -33,7 +33,7 @@ public class ManageUsersDialog extends JDialog {
     JPanel panel = new JPanel(new BorderLayout());
     panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-    String[] columnNames = {"Username", "Role", "Actions"};
+    String[] columnNames = { "Username", "Role", "Actions" };
     tableModel = new DefaultTableModel(columnNames, 0) {
       @Override
       public boolean isCellEditable(int row, int column) {
@@ -67,10 +67,10 @@ public class ManageUsersDialog extends JDialog {
   private void loadUsers() {
     tableModel.setRowCount(0);
     // In a real app, we'd fetch all users. For now, we'll show a placeholder
-    tableModel.addRow(new Object[]{"guest", "GUEST", "Toggle Role"});
-    tableModel.addRow(new Object[]{"student", "STUDENT", "Toggle Role"});
-    tableModel.addRow(new Object[]{"staff", "STAFF", "Toggle Role"});
-    tableModel.addRow(new Object[]{"admin", "ADMIN", "Toggle Role"});
+    tableModel.addRow(new Object[] { "guest", "GUEST", "Toggle Role" });
+    tableModel.addRow(new Object[] { "student", "STUDENT", "Toggle Role" });
+    tableModel.addRow(new Object[] { "staff", "STAFF", "Toggle Role" });
+    tableModel.addRow(new Object[] { "admin", "ADMIN", "Toggle Role" });
   }
 
   class ButtonRenderer extends JButton implements TableCellRenderer {
@@ -80,8 +80,8 @@ public class ManageUsersDialog extends JDialog {
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value,
-                                                   boolean isSelected, boolean hasFocus,
-                                                   int row, int column) {
+        boolean isSelected, boolean hasFocus,
+        int row, int column) {
       setText((value == null) ? "Toggle Role" : value.toString());
       return this;
     }
@@ -102,7 +102,7 @@ public class ManageUsersDialog extends JDialog {
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value,
-                                                 boolean isSelected, int row, int column) {
+        boolean isSelected, int row, int column) {
       label = (value == null) ? "Toggle Role" : value.toString();
       button.setText(label);
       clicked = true;
@@ -144,7 +144,8 @@ public class ManageUsersDialog extends JDialog {
     userRepo.find(username).ifPresent(user -> {
       // Remove old user and add new one with updated role
       User updatedUser = new User(username, user.password(), newRole);
-      // In a real app, we'd have an update method. For now, just show the change in the table
+      // In a real app, we'd have an update method. For now, just show the change in
+      // the table
       for (int i = 0; i < tableModel.getRowCount(); i++) {
         if (tableModel.getValueAt(i, 0).equals(username)) {
           tableModel.setValueAt(newRole.name(), i, 1);

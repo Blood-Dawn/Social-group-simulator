@@ -33,7 +33,7 @@ public class ModeratePostsDialog extends JDialog {
     JPanel panel = new JPanel(new BorderLayout());
     panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-    String[] columnNames = {"Title", "Author", "Category", "Likes", "Actions"};
+    String[] columnNames = { "Title", "Author", "Category", "Likes", "Actions" };
     tableModel = new DefaultTableModel(columnNames, 0) {
       @Override
       public boolean isCellEditable(int row, int column) {
@@ -72,7 +72,7 @@ public class ModeratePostsDialog extends JDialog {
     tableModel.setRowCount(0);
     List<Post> posts = postController.current();
     for (Post post : posts) {
-      tableModel.addRow(new Object[]{
+      tableModel.addRow(new Object[] {
           post.title().length() > 30 ? post.title().substring(0, 30) + "..." : post.title(),
           post.author(),
           post.category().name(),
@@ -90,8 +90,8 @@ public class ModeratePostsDialog extends JDialog {
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value,
-                                                   boolean isSelected, boolean hasFocus,
-                                                   int row, int column) {
+        boolean isSelected, boolean hasFocus,
+        int row, int column) {
       return this;
     }
   }
@@ -110,7 +110,7 @@ public class ModeratePostsDialog extends JDialog {
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value,
-                                                 boolean isSelected, int row, int column) {
+        boolean isSelected, int row, int column) {
       clicked = true;
       currentRow = row;
       return button;

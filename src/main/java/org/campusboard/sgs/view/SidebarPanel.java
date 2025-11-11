@@ -88,8 +88,7 @@ public class SidebarPanel extends JPanel {
     button.setHorizontalAlignment(SwingConstants.LEFT);
     button.setBorder(BorderFactory.createCompoundBorder(
         BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-        BorderFactory.createEmptyBorder(5, 10, 5, 10)
-    ));
+        BorderFactory.createEmptyBorder(5, 10, 5, 10)));
     button.setFocusPainted(false);
     button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
@@ -97,6 +96,7 @@ public class SidebarPanel extends JPanel {
       public void mouseEntered(java.awt.event.MouseEvent e) {
         button.setBackground(BUTTON_HOVER);
       }
+
       public void mouseExited(java.awt.event.MouseEvent e) {
         button.setBackground(BUTTON_BG);
       }
@@ -113,8 +113,7 @@ public class SidebarPanel extends JPanel {
     panel.setBackground(SIDEBAR_BG);
     panel.setBorder(BorderFactory.createCompoundBorder(
         BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(200, 200, 200)),
-        BorderFactory.createEmptyBorder(10, 10, 10, 10)
-    ));
+        BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 
     userLabel = new JLabel();
     userLabel.setFont(new Font("Arial", Font.PLAIN, 12));
@@ -131,10 +130,10 @@ public class SidebarPanel extends JPanel {
       if (session.isAuthenticated()) {
         User user = session.user();
         userLabel.setText("<html><b>Logged in as:</b><br>" +
-                         user.username() + " (" + user.role() + ")</html>");
+            user.username() + " (" + user.role() + ")</html>");
       } else {
         userLabel.setText("<html><b>Guest mode</b><br>" +
-                         "Login to access<br>full features</html>");
+            "Login to access<br>full features</html>");
       }
     });
   }

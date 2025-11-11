@@ -20,10 +20,10 @@ public class MainWindow extends JFrame {
   private JMenuItem redoItem;
 
   public MainWindow(PostController postController,
-                    AuthController authController,
-                    UserRepository userRepo,
-                    Session session,
-                    EventBus bus) {
+      AuthController authController,
+      UserRepository userRepo,
+      Session session,
+      EventBus bus) {
     super("CampusBoard");
     this.postController = postController;
     this.authController = authController;
@@ -80,16 +80,13 @@ public class MainWindow extends JFrame {
     // Admin menu (initially hidden)
     adminMenu = new JMenu("Admin");
     JMenuItem manageUsersItem = new JMenuItem("Manage Users");
-    manageUsersItem.addActionListener(e ->
-        ManageUsersDialog.showDialog(this, userRepo, bus));
+    manageUsersItem.addActionListener(e -> ManageUsersDialog.showDialog(this, userRepo, bus));
 
     JMenuItem moderatePostsItem = new JMenuItem("Moderate Posts");
-    moderatePostsItem.addActionListener(e ->
-        ModeratePostsDialog.showDialog(this, postController, bus));
+    moderatePostsItem.addActionListener(e -> ModeratePostsDialog.showDialog(this, postController, bus));
 
     JMenuItem viewReportsItem = new JMenuItem("View Reports");
-    viewReportsItem.addActionListener(e ->
-        ViewReportsDialog.showDialog(this, postController));
+    viewReportsItem.addActionListener(e -> ViewReportsDialog.showDialog(this, postController));
 
     adminMenu.add(manageUsersItem);
     adminMenu.add(moderatePostsItem);
@@ -146,7 +143,7 @@ public class MainWindow extends JFrame {
   private void showAboutDialog() {
     JOptionPane.showMessageDialog(this,
         "CampusBoard\nVersion 1.0\n\n" +
-        "A social posting system for campus communities",
+            "A social posting system for campus communities",
         "About CampusBoard",
         JOptionPane.INFORMATION_MESSAGE);
   }

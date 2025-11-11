@@ -31,8 +31,7 @@ public class TopBar extends JPanel {
     setBackground(TOPBAR_BG);
     setBorder(BorderFactory.createCompoundBorder(
         BorderFactory.createMatteBorder(0, 0, 2, 0, FAU_NAVY),
-        BorderFactory.createEmptyBorder(10, 15, 10, 15)
-    ));
+        BorderFactory.createEmptyBorder(10, 15, 10, 15)));
 
     add(createSearchPanel(), BorderLayout.CENTER);
     add(createAuthPanel(), BorderLayout.EAST);
@@ -57,8 +56,7 @@ public class TopBar extends JPanel {
     searchField.setFont(new Font("Arial", Font.PLAIN, 14));
     searchField.setBorder(BorderFactory.createCompoundBorder(
         BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-        BorderFactory.createEmptyBorder(5, 10, 5, 10)
-    ));
+        BorderFactory.createEmptyBorder(5, 10, 5, 10)));
     searchField.addActionListener(e -> posts.setSearch(searchField.getText()));
 
     // Add document listener for real-time search
@@ -120,8 +118,7 @@ public class TopBar extends JPanel {
     logoutButton.setBorderPainted(true);
     logoutButton.setBorder(BorderFactory.createCompoundBorder(
         BorderFactory.createLineBorder(FAU_RED, 1),
-        BorderFactory.createEmptyBorder(5, 15, 5, 15)
-    ));
+        BorderFactory.createEmptyBorder(5, 15, 5, 15)));
     logoutButton.setFocusPainted(false);
     logoutButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     logoutButton.addActionListener(e -> handleLogout());
@@ -135,7 +132,7 @@ public class TopBar extends JPanel {
 
       if (session.isAuthenticated()) {
         usernameLabel.setText("Welcome, " + session.user().username() +
-                             " (" + session.user().role() + ")");
+            " (" + session.user().role() + ")");
         authPanel.add(usernameLabel);
         authPanel.add(logoutButton);
       } else {
@@ -162,8 +159,7 @@ public class TopBar extends JPanel {
         panel,
         "Login",
         JOptionPane.OK_CANCEL_OPTION,
-        JOptionPane.PLAIN_MESSAGE
-    );
+        JOptionPane.PLAIN_MESSAGE);
 
     if (result == JOptionPane.OK_OPTION) {
       String username = usernameField.getText();
