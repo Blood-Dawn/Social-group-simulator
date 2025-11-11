@@ -16,4 +16,5 @@ public final class User {
   public String username() { return username; }
   public String password() { return password; }
   public Role role() { return role; }
+  public UserType getUserType() { return UserType.fromRole(role); }
 }
