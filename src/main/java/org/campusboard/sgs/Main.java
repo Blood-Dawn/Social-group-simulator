@@ -4,7 +4,6 @@ import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import org.campusboard.sgs.Persistence.*;
@@ -26,7 +25,8 @@ public class Main {
             if (useRemoteRepository) {
                 String remoteUrl = resolveRemoteUrl();
                 Duration pollInterval = resolvePollInterval();
-                System.out.println("🌐 Main: Using remote post repository at " + remoteUrl + " (poll interval " + pollInterval.toSeconds() + "s)");
+                System.out.println("🌐 Main: Using remote post repository at " + remoteUrl + " (poll interval "
+                        + pollInterval.toSeconds() + "s)");
 
                 RemotePostRepository remoteRepo = new RemotePostRepository(remoteUrl);
                 remoteRepo.addRemoteUpdateListener(posts -> EventBus.publish(AppEvent.POSTS_CHANGED, posts));
@@ -44,7 +44,7 @@ public class Main {
             UserRepository userRepo = new InMemoryUserRepository();
             Controller controller = new Controller(postRepo, userRepo);
 
-            seedDemoData(postRepo, userRepo);
+            seedDemoData(controller, postRepo, userRepo);
 
             MainWindow mainWindow = new MainWindow(controller);
             if (syncClient != null) {
@@ -62,25 +62,33 @@ public class Main {
     }
 
     private static void seedDemoData(Controller controller, PostRepository postRepo, UserRepository userRepo) {
-        // Pre-seeded users ensure demo posts have persistent author references for the UI.
+        // Pre-seeded users ensure demo posts have persistent author references for the
+        // UI.
         User admin = new User("admin", "admin@fau.edu", "Campus Admin", UserType.STAFF);
         User john = new User("john_doe", "john.doe@fau.edu", "John Doe", UserType.STUDENT);
         User athleticsClub = new User("sports_fan", "athletics@fau.edu", "Owls Athletics", UserType.CLUB);
         User sarah = new User("sarah_owls", "sarah.owls@fau.edu", "Sarah O.", UserType.STUDENT);
 
         userRepo.save(admin);
+        userRepo.assignPassword(admin, "admin123".toCharArray());
         userRepo.save(john);
+        userRepo.assignPassword(john, "student123".toCharArray());
         userRepo.save(athleticsClub);
+        userRepo.assignPassword(athleticsClub, "club123".toCharArray());
         userRepo.save(sarah);
+        userRepo.assignPassword(sarah, "student123".toCharArray());
 
         controller.setCurrentUser(admin);
 
         List<Post> demoPosts = List.of(
-                createPost("Welcome to Campus Board!", "This is your go-to spot for announcements, events, and more.", Category.ANNOUNCEMENTS, admin),
-                createPost("Study Group for COP3330", "Looking for teammates to prep for the midterm this weekend.", Category.STUDY_GROUPS, john),
-                createPost("Basketball Game Tonight!", "FAU vs FIU at 7pm in the arena. Free pizza for students!", Category.EVENTS, athleticsClub),
-                createPost("Lost Backpack", "Navy backpack left in the library yesterday. Please DM if found.", Category.LOST_AND_FOUND, sarah)
-        );
+                createPost("Welcome to Campus Board!", "This is your go-to spot for announcements, events, and more.",
+                        Category.ANNOUNCEMENTS, admin),
+                createPost("Study Group for COP3330", "Looking for teammates to prep for the midterm this weekend.",
+                        Category.STUDY_GROUPS, john),
+                createPost("Basketball Game Tonight!", "FAU vs FIU at 7pm in the arena. Free pizza for students!",
+                        Category.EVENTS, athleticsClub),
+                createPost("Lost Backpack", "Navy backpack left in the library yesterday. Please DM if found.",
+                        Category.LOST_AND_FOUND, sarah));
 
         demoPosts.forEach(post -> {
             postRepo.save(post);

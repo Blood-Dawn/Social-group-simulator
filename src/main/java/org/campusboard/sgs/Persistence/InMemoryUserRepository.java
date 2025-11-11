@@ -79,4 +79,66 @@ public class InMemoryUserRepository implements UserRepository {
         user.setActive(false);
         return true;
     }
+
+    @Override
+    public void assignPassword(User user, char[] password) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+        if (password == null || password.length == 0) {
+            throw new IllegalArgumentException("Password cannot be empty");
+        }
+
+        char[] passwordCopy = Arrays.copyOf(password, password.length);
+        try {
+            byte[] salt = new byte[32];
+            RANDOM.nextBytes(salt);
+
+            String saltEncoded = Base64.getEncoder().encodeToString(salt);
+            String hash = hashPassword(passwordCopy, salt);
+
+            user.setPasswordSalt(saltEncoded);
+            user.setPasswordHash(hash);
+            user.setFailedLoginAttempts(0);
+
+            users.put(user.getId(), user);
+        } finally {
+            Arrays.fill(passwordCopy, '\0');
+        }
+    }
+
+    @Override
+    public boolean validatePassword(User user, char[] password) {
+        if (user == null || password == null || password.length == 0) {
+            return false;
+        }
+
+        String saltEncoded = user.getPasswordSalt();
+        String expectedHash = user.getPasswordHash();
+        if (saltEncoded == null || expectedHash == null) {
+            return false;
+        }
+
+        byte[] salt;
+        try {
+            salt = Base64.getDecoder().decode(saltEncoded);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+
+        String candidateHash = hashPassword(password, salt);
+        return MessageDigest.isEqual(expectedHash.getBytes(StandardCharsets.UTF_8),
+                candidateHash.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private String hashPassword(char[] password, byte[] salt) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            digest.update(salt);
+            byte[] hashed = digest.digest(new String(password).getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(hashed);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 not available", e);
+        }
+    }
 }

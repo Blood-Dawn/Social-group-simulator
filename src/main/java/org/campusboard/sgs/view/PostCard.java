@@ -8,6 +8,7 @@ import java.time.Duration;
 import org.campusboard.sgs.controller.Controller;
 import org.campusboard.sgs.model.Post;
 import org.campusboard.sgs.model.User;
+import org.campusboard.sgs.model.UserType;
 
 /**
  * Individual post card component with modern design
@@ -21,14 +22,14 @@ public class PostCard extends JPanel {
     private JLabel adminBadge;
     private JPanel headerPanel;
     private UserType currentRole = UserType.GUEST;
-    
+
     private static final Color FAU_NAVY = new Color(0, 51, 102);
     private static final Color FAU_RED = new Color(206, 17, 65);
     private static final Color CARD_BACKGROUND = Color.WHITE;
     private static final Color HOVER_COLOR = new Color(248, 249, 250);
     private static final Color TEXT_PRIMARY = new Color(33, 37, 41);
     private static final Color TEXT_SECONDARY = new Color(108, 117, 125);
-    
+
     public PostCard(Post post, Controller controller) {
         this.post = post;
         this.controller = controller;
@@ -36,38 +37,37 @@ public class PostCard extends JPanel {
         initializeModernCard();
         applyRole(controller.getCurrentUserType());
     }
-    
+
     /**
      * Initialize card with shadow border and hover effect
      */
     private void initializeModernCard() {
         setLayout(new BorderLayout(15, 15));
         setBackground(CARD_BACKGROUND);
-        
+
         // Shadow border effect
         setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createCompoundBorder(
-                BorderFactory.createEmptyBorder(2, 2, 6, 2),
-                BorderFactory.createLineBorder(new Color(0, 0, 0, 20), 1)
-            ),
-            BorderFactory.createEmptyBorder(20, 20, 20, 20)
-        ));
-        
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createEmptyBorder(2, 2, 6, 2),
+                        BorderFactory.createLineBorder(new Color(0, 0, 0, 20), 1)),
+                BorderFactory.createEmptyBorder(20, 20, 20, 20)));
+
         // Hover effect - light gray on mouse over
         addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent e) {
                 setBackground(HOVER_COLOR);
             }
+
             public void mouseExited(java.awt.event.MouseEvent e) {
                 setBackground(CARD_BACKGROUND);
             }
         });
-        
+
         add(createHeaderSection(), BorderLayout.NORTH);
         add(createContentSection(), BorderLayout.CENTER);
         add(createFooterSection(), BorderLayout.SOUTH);
     }
-    
+
     /**
      * Create header with avatar, username, timestamp, category badge, delete button
      */
@@ -79,8 +79,9 @@ public class PostCard extends JPanel {
         // LEFT - Avatar + User info
         JPanel userInfo = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         userInfo.setOpaque(false);
-        
-        // The post always carries a User author; render their identity details directly.
+
+        // The post always carries a User author; render their identity details
+        // directly.
         User author = post.getAuthor();
         String usernameValue = extractUsername(author);
         String displayNameValue = extractDisplayName(author);
@@ -110,14 +111,14 @@ public class PostCard extends JPanel {
         textInfo.add(username);
         textInfo.add(timestamp);
         userInfo.add(textInfo);
-        
+
         // RIGHT - Category badge + Delete button
         JPanel rightSide = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         rightSide.setOpaque(false);
-        
+
         JLabel categoryBadge = createRoundedBadge(post.getCategory().name());
         rightSide.add(categoryBadge);
-        
+
         deleteButton = createIconButton("×");
         deleteButton.setFont(new Font("Arial", Font.BOLD, 20));
         deleteButton.setToolTipText("Delete post");
@@ -134,7 +135,7 @@ public class PostCard extends JPanel {
 
         return header;
     }
-    
+
     /**
      * Create content section with title (centered) and body (left-aligned)
      */
@@ -143,21 +144,21 @@ public class PostCard extends JPanel {
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
         content.setOpaque(false);
         content.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
-        
+
         // Title - centered
         JPanel titlePanel = new JPanel();
         titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.X_AXIS));
         titlePanel.setOpaque(false);
         titlePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
+
         JLabel title = new JLabel(post.getTitle());
         title.setFont(new Font("Arial", Font.BOLD, 20));
         title.setForeground(FAU_NAVY);
-        
+
         titlePanel.add(Box.createHorizontalGlue());
         titlePanel.add(title);
         titlePanel.add(Box.createHorizontalGlue());
-        
+
         // Body - left aligned with word wrap
         JTextArea body = new JTextArea(post.getBody());
         body.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -168,28 +169,28 @@ public class PostCard extends JPanel {
         body.setOpaque(false);
         body.setBorder(null);
         body.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
+
         content.add(titlePanel);
         content.add(Box.createVerticalStrut(12));
         content.add(body);
-        
+
         return content;
     }
-    
+
     /**
      * Create footer with like button
      */
     private JPanel createFooterSection() {
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 0));
         footer.setOpaque(false);
-        
+
         JButton likeBtn = createActionButton("♥", post.getLikes());
         likeBtn.addActionListener(e -> handleLike());
         footer.add(likeBtn);
-        
+
         return footer;
     }
-    
+
     /**
      * Create circular avatar with painted graphics
      * Uses custom paintComponent for smooth circle
@@ -219,7 +220,7 @@ public class PostCard extends JPanel {
         avatar.setOpaque(false);
         return avatar;
     }
-    
+
     /**
      * Create rounded category badge
      */
@@ -231,12 +232,11 @@ public class PostCard extends JPanel {
         badge.setBackground(new Color(225, 239, 254));
         badge.setOpaque(true);
         badge.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 230, 255), 1),
-            BorderFactory.createEmptyBorder(4, 12, 4, 12)
-        ));
+                BorderFactory.createLineBorder(new Color(200, 230, 255), 1),
+                BorderFactory.createEmptyBorder(4, 12, 4, 12)));
         return badge;
     }
-    
+
     /**
      * Create action button (like) with hover effect
      */
@@ -248,19 +248,20 @@ public class PostCard extends JPanel {
         btn.setBorderPainted(false);
         btn.setFocusPainted(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        
+
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent e) {
                 btn.setForeground(FAU_NAVY);
             }
+
             public void mouseExited(java.awt.event.MouseEvent e) {
                 btn.setForeground(TEXT_SECONDARY);
             }
         });
-        
+
         return btn;
     }
-    
+
     /**
      * Create icon button (delete) with hover effect
      */
@@ -273,11 +274,12 @@ public class PostCard extends JPanel {
         btn.setFocusPainted(false);
         btn.setContentAreaFilled(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        
+
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent e) {
                 btn.setForeground(FAU_RED);
             }
+
             public void mouseExited(java.awt.event.MouseEvent e) {
                 btn.setForeground(TEXT_SECONDARY);
             }
@@ -322,18 +324,18 @@ public class PostCard extends JPanel {
         System.out.println("♥ PostCard: Like button clicked for post: " + post.getId());
         controller.likePost(post.getId());
     }
-    
+
     /**
      * Handle delete button click with confirmation
      */
     private void handleDelete() {
         System.out.println("× PostCard: Delete button clicked");
         int confirm = JOptionPane.showConfirmDialog(this,
-            "Are you sure you want to delete this post?",
-            "Confirm Delete",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.WARNING_MESSAGE);
-        
+                "Are you sure you want to delete this post?",
+                "Confirm Delete",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+
         if (confirm == JOptionPane.YES_OPTION) {
             controller.deletePost(post.getId());
         }
@@ -342,29 +344,34 @@ public class PostCard extends JPanel {
     private boolean isAdminRole(UserType role) {
         return role == UserType.STAFF || role == UserType.ADMINISTRATION;
     }
-    
+
     /**
      * Format timestamp to human-readable string
      * Examples: "Just now", "5 minutes ago", "3 hours ago", "Oct 14, 2025"
      */
     private String formatTimestamp(LocalDateTime createdAt) {
-        if (createdAt == null) return "Unknown";
-        
+        if (createdAt == null)
+            return "Unknown";
+
         LocalDateTime now = LocalDateTime.now();
         Duration duration = Duration.between(createdAt, now);
-        
+
         long minutes = duration.toMinutes();
         long hours = duration.toHours();
         long days = duration.toDays();
-        
-        if (minutes < 1) return "Just now";
-        if (minutes < 60) return minutes + " minute" + (minutes > 1 ? "s" : "") + " ago";
-        if (hours < 24) return hours + " hour" + (hours > 1 ? "s" : "") + " ago";
-        if (days < 7) return days + " day" + (days > 1 ? "s" : "") + " ago";
-        
+
+        if (minutes < 1)
+            return "Just now";
+        if (minutes < 60)
+            return minutes + " minute" + (minutes > 1 ? "s" : "") + " ago";
+        if (hours < 24)
+            return hours + " hour" + (hours > 1 ? "s" : "") + " ago";
+        if (days < 7)
+            return days + " day" + (days > 1 ? "s" : "") + " ago";
+
         return createdAt.format(DateTimeFormatter.ofPattern("MMM d, yyyy"));
     }
-    
+
     /**
      * Format category from ENUM_CASE to Title Case
      */
@@ -374,8 +381,8 @@ public class PostCard extends JPanel {
         for (String word : words) {
             if (word.length() > 0) {
                 result.append(word.substring(0, 1).toUpperCase())
-                      .append(word.substring(1).toLowerCase())
-                      .append(" ");
+                        .append(word.substring(1).toLowerCase())
+                        .append(" ");
             }
         }
         return result.toString().trim();

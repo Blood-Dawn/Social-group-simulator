@@ -24,6 +24,7 @@ dependencies {
 
     // JUnit 5 - updated version
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.3'
 
     // AssertJ for fluent assertions
     testImplementation 'org.assertj:assertj-core:3.26.0'

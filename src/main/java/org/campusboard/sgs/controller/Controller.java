@@ -19,7 +19,8 @@ public class Controller {
     private final UserRepository userRepository;
     private final UndoManager undoManager;
     private User currentUser;
-    // Persisted guest account ensures anonymous posts still resolve to a concrete user.
+    // Persisted guest account ensures anonymous posts still resolve to a concrete
+    // user.
     private final User guestUser;
     private Category activeFilter;
     private FilterStrategy filterStrategy;
@@ -38,13 +39,13 @@ public class Controller {
         this.undoManager = new UndoManager();
         this.guestUser = initializeGuestUser();
     }
-    
+
     // ============ POST MANAGEMENT ============
-    
+
     public void createPost(String title, String body) {
         createPost(title, body, Category.GENERAL);
     }
-    
+
     public void createPost(String title, String body, Category category) {
         if (title == null || title.trim().isEmpty()) {
             throw new IllegalArgumentException("Title cannot be empty");
@@ -53,14 +54,15 @@ public class Controller {
             throw new IllegalArgumentException("Body cannot be empty");
         }
 
-        // Always attach either the logged-in user or the shared guest account when persisting posts.
+        // Always attach either the logged-in user or the shared guest account when
+        // persisting posts.
         Post post = new Post(title.trim(), body.trim(), category, resolveAuthor());
 
         postRepository.save(post);
         EventBus.publish(AppEvent.POST_CREATED, post);
         EventBus.publish(AppEvent.POSTS_CHANGED);
     }
-    
+
     public void deletePost(UUID postId) {
         if (postId == null) {
             return;
@@ -71,7 +73,7 @@ public class Controller {
             EventBus.publish(AppEvent.POSTS_CHANGED);
         }
     }
-    
+
     public void likePost(UUID postId) {
         if (postId == null) {
             return;
@@ -83,7 +85,7 @@ public class Controller {
             EventBus.publish(AppEvent.POSTS_CHANGED);
         }
     }
-    
+
     public void dislikePost(UUID postId) {
         if (postId == null) {
             return;
@@ -95,7 +97,7 @@ public class Controller {
             EventBus.publish(AppEvent.POSTS_CHANGED);
         }
     }
-    
+
     public List<Post> getAllPosts() {
         List<Post> posts = postRepository.findAll();
         posts.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
@@ -112,7 +114,7 @@ public class Controller {
 
         return posts;
     }
-    
+
     public List<Post> getPostsByCategory(Category category) {
         if (category == null) {
             return getAllPosts();
@@ -123,9 +125,9 @@ public class Controller {
         posts.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
         return posts;
     }
-    
+
     // ============ USER MANAGEMENT ============
-    
+
     public void createUser(String username, String email, String displayName, UserType userType) {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("Username cannot be empty");
@@ -145,7 +147,7 @@ public class Controller {
         userRepository.save(user);
         EventBus.publish(AppEvent.DATA_LOADED, user);
     }
-    
+
     public AuthenticationResult authenticateUser(String username, char[] password) {
         if (username == null || username.isBlank()) {
             return AuthenticationResult.failure("Username is required.");
@@ -169,7 +171,8 @@ public class Controller {
 
                         user.incrementFailedLoginAttempts();
                         userRepository.update(user);
-                        return AuthenticationResult.failure("Invalid username or password. Attempts: " + user.getFailedLoginAttempts());
+                        return AuthenticationResult
+                                .failure("Invalid username or password. Attempts: " + user.getFailedLoginAttempts());
                     })
                     .orElse(AuthenticationResult.failure("Invalid username or password."));
         } finally {
@@ -202,7 +205,7 @@ public class Controller {
             return message;
         }
     }
-    
+
     public User getCurrentUser() {
         return currentUser;
     }
@@ -227,35 +230,41 @@ public class Controller {
     }
 
     private User initializeGuestUser() {
-        return userRepository.findByUsername("guest")
+        User guest = userRepository.findByUsername("guest")
                 .orElseGet(() -> userRepository.save(
                         new User("guest", "guest@campusboard.local", "Guest", UserType.GUEST)));
+
+        if (guest.getPasswordHash() == null) {
+            userRepository.assignPassword(guest, "guest123".toCharArray());
+        }
+        return guest;
     }
 
     private User resolveAuthor() {
-        // Fall back to the guest user so repository writes never encounter null authors.
+        // Fall back to the guest user so repository writes never encounter null
+        // authors.
         return currentUser != null ? currentUser : guestUser;
     }
 
     public void performSearch(String query) {
-    searchQuery = query == null ? "" : query.trim().toLowerCase();
+        searchQuery = query == null ? "" : query.trim().toLowerCase();
         EventBus.publish(AppEvent.SEARCH_REQUESTED, searchQuery);
         EventBus.publish(AppEvent.POSTS_CHANGED);
     }
-    
+
     // ============ SEARCH & FILTER ============
-    
+
     public List<Post> searchPosts(String query) {
         performSearch(query);
         return getAllPosts();
     }
-    
+
     public void applyFilter(Category category) {
         activeFilter = category;
         EventBus.publish(AppEvent.FILTER_CHANGED, category);
         EventBus.publish(AppEvent.POSTS_CHANGED);
     }
-    
+
     public void clearFilters() {
         activeFilter = null;
         searchQuery = "";
@@ -263,17 +272,17 @@ public class Controller {
         EventBus.publish(AppEvent.SEARCH_REQUESTED, "");
         EventBus.publish(AppEvent.POSTS_CHANGED);
     }
-    
+
     // ============ CAMPUS-SPECIFIC FEATURES ============
-    
+
     public List<Post> getAnnouncementsPosts() {
         return getPostsByCategory(Category.ANNOUNCEMENTS);
     }
-    
+
     public List<Post> getEventsPosts() {
         return getPostsByCategory(Category.EVENTS);
     }
-    
+
     public List<Post> getClubsPosts() {
         return getPostsByCategory(Category.CLUBS_ORGS);
     }
@@ -295,7 +304,8 @@ public class Controller {
             throw new IllegalArgumentException("Body cannot be empty");
         }
 
-        CreatePostCommand cmd = new CreatePostCommand(postRepository, title.trim(), body.trim(), category, resolveAuthor());
+        CreatePostCommand cmd = new CreatePostCommand(postRepository, title.trim(), body.trim(), category,
+                resolveAuthor());
         try {
             undoManager.doCommand(cmd);
         } catch (Exception e) {
