@@ -141,6 +141,7 @@ public class ModeratePostsDialog extends JDialog {
 
     if (confirm == JOptionPane.YES_OPTION) {
       postController.delete(post);
+      bus.publish(org.campusboard.sgs.util.Events.POSTS_REPLACED, null);
       JOptionPane.showMessageDialog(this,
           "Post deleted successfully",
           "Success",

@@ -16,7 +16,7 @@ public class PostController {
   private FilterStrategy filterStrategy = new AllFilter();
   private String search = null;
 
-  public PostController(PostRepository posts, UserRepository users, Session session, EventBus bus){
+  public PostController(PostRepository posts, UserRepository users, Session session, EventBus bus) {
     this.posts = posts;
     this.users = users;
     this.session = session;
@@ -35,8 +35,8 @@ public class PostController {
     String searchLower = search.toLowerCase();
     return filtered.stream()
         .filter(p -> p.title().toLowerCase().contains(searchLower) ||
-                     p.body().toLowerCase().contains(searchLower) ||
-                     p.author().toLowerCase().contains(searchLower))
+            p.body().toLowerCase().contains(searchLower) ||
+            p.author().toLowerCase().contains(searchLower))
         .collect(Collectors.toList());
   }
 
@@ -61,12 +61,14 @@ public class PostController {
   }
 
   public void edit(Post post, String title, String body, Category cat) {
-    if (!canModifyPost(post)) return;
+    if (!canModifyPost(post))
+      return;
     undoManager.execute(new EditPostCommand(posts, bus, post, title, body, cat));
   }
 
   public void delete(Post post) {
-    if (!canModifyPost(post)) return;
+    if (!canModifyPost(post))
+      return;
     undoManager.execute(new DeletePostCommand(posts, bus, post));
   }
 
@@ -102,10 +104,16 @@ public class PostController {
     return undoManager.getRedoDescription();
   }
 
+  public boolean isValidAuthor(String username) {
+    return users.find(username).isPresent();
+  }
+
   private boolean canModifyPost(Post post) {
-    if (!session.isAuthenticated()) return false;
+    if (!session.isAuthenticated())
+      return false;
     Role role = session.role();
-    if (role == Role.ADMIN || role == Role.STAFF) return true;
+    if (role == Role.ADMIN || role == Role.STAFF)
+      return true;
     return post.author().equals(session.user().username());
   }
 

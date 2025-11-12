@@ -3,7 +3,6 @@ package org.campusboard.sgs.controller;
 import org.campusboard.sgs.model.*;
 import org.campusboard.sgs.repo.PostRepository;
 import org.campusboard.sgs.util.*;
-import java.util.UUID;
 
 public class CreatePostCommand implements Command {
   private final PostRepository repo;

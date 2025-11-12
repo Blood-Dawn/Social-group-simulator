@@ -137,4 +137,8 @@ public class SidebarPanel extends JPanel {
       }
     });
   }
+
+  public EventBus getEventBus() {
+    return bus;
+  }
 }

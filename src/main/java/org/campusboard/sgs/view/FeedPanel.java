@@ -18,9 +18,10 @@ public class FeedPanel extends JPanel {
   private final Map<UUID, PostCard> cards = new LinkedHashMap<>();
   private final javax.swing.Timer debounce = new javax.swing.Timer(120, e -> doRefresh()); // EDT-safe debounce
 
-  public FeedPanel(PostController controller, EventBus bus){
+  public FeedPanel(PostController controller, EventBus bus) {
     super(new BorderLayout());
-    this.controller = controller; this.bus = bus;
+    this.controller = controller;
+    this.bus = bus;
     content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
     this.scroll = new JScrollPane(content);
     add(scroll, BorderLayout.CENTER);
@@ -33,30 +34,43 @@ public class FeedPanel extends JPanel {
     schedule();
   }
 
-  private void schedule(){ if (debounce.isRunning()) debounce.restart(); else debounce.start(); }
+  private void schedule() {
+    if (debounce.isRunning())
+      debounce.restart();
+    else
+      debounce.start();
+  }
 
-  private void doRefresh(){
+  private void doRefresh() {
     int y = scroll.getVerticalScrollBar().getValue(); // remember position
     List<Post> now = controller.current();
     Set<UUID> incoming = now.stream().map(Post::id).collect(Collectors.toSet());
 
     // Remove missing
     var it = cards.keySet().iterator();
-    while (it.hasNext()){
+    while (it.hasNext()) {
       var id = it.next();
-      if (!incoming.contains(id)) { content.remove(cards.get(id)); it.remove(); }
+      if (!incoming.contains(id)) {
+        content.remove(cards.get(id));
+        it.remove();
+      }
     }
     // Rebuild order + bind
     content.removeAll();
-    for (Post p: now){
+    for (Post p : now) {
       PostCard card = cards.computeIfAbsent(p.id(), id -> new PostCard(controller));
       card.bind(p);
       content.add(card);
       content.add(Box.createVerticalStrut(8));
     }
-    content.revalidate(); content.repaint();
+    content.revalidate();
+    content.repaint();
 
     // restore scroll to avoid jump to top
     SwingUtilities.invokeLater(() -> scroll.getVerticalScrollBar().setValue(y));
+  }
+
+  public EventBus getEventBus() {
+    return bus;
   }
 }

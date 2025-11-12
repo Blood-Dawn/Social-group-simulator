@@ -193,4 +193,8 @@ public class TopBar extends JPanel {
           JOptionPane.INFORMATION_MESSAGE);
     }
   }
+
+  public EventBus getEventBus() {
+    return bus;
+  }
 }

@@ -9,13 +9,15 @@ public class AuthController {
   private final Session session;
   private final EventBus bus;
 
-  public AuthController(UserRepository users, Session session, EventBus bus){
-    this.users = users; this.session = session; this.bus = bus;
+  public AuthController(UserRepository users, Session session, EventBus bus) {
+    this.users = users;
+    this.session = session;
+    this.bus = bus;
   }
 
-  public boolean login(String user, String pass){
+  public boolean login(String user, String pass) {
     var u = users.find(user).orElse(null);
-    if (u!=null && u.password().equals(pass)){
+    if (u != null && u.password().equals(pass)) {
       session.setUser(u);
       bus.publish(Events.USER_LOGGED_IN, u.username());
       return true;
@@ -23,8 +25,20 @@ public class AuthController {
     return false;
   }
 
-  public void logout(){
+  public void logout() {
     session.clear();
     bus.publish(Events.USER_LOGGED_OUT);
+  }
+
+  public User getCurrentUser() {
+    return session.user();
+  }
+
+  public boolean isAuthenticated() {
+    return session.isAuthenticated();
+  }
+
+  public Role getCurrentRole() {
+    return session.role();
   }
 }

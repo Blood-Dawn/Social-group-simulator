@@ -6,7 +6,6 @@ import org.campusboard.sgs.util.*;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
-import java.util.List;
 
 public class ManageUsersDialog extends JDialog {
   private final UserRepository userRepo;
@@ -144,14 +143,18 @@ public class ManageUsersDialog extends JDialog {
     userRepo.find(username).ifPresent(user -> {
       // Remove old user and add new one with updated role
       User updatedUser = new User(username, user.password(), newRole);
-      // In a real app, we'd have an update method. For now, just show the change in
-      // the table
+      userRepo.add(updatedUser);
+
+      // Update the table display
       for (int i = 0; i < tableModel.getRowCount(); i++) {
         if (tableModel.getValueAt(i, 0).equals(username)) {
           tableModel.setValueAt(newRole.name(), i, 1);
           break;
         }
       }
+
+      // Publish event to notify other components
+      bus.publish(Events.USER_LOGGED_OUT, username);
 
       JOptionPane.showMessageDialog(this,
           "Role updated to " + newRole.name() + " for user " + username,
