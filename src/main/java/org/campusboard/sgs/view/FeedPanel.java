@@ -12,15 +12,17 @@ import java.util.stream.Collectors;
 /** Scrollable feed that avoids full rebuilds to stop jumping to top. */
 public class FeedPanel extends JPanel {
   private final PostController controller;
+  private final Session session;
   private final EventBus bus;
   private final JScrollPane scroll;
   private final JPanel content = new JPanel();
   private final Map<UUID, PostCard> cards = new LinkedHashMap<>();
   private final javax.swing.Timer debounce = new javax.swing.Timer(120, e -> doRefresh()); // EDT-safe debounce
 
-  public FeedPanel(PostController controller, EventBus bus) {
+  public FeedPanel(PostController controller, Session session, EventBus bus) {
     super(new BorderLayout());
     this.controller = controller;
+    this.session = session;
     this.bus = bus;
     content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
     this.scroll = new JScrollPane(content);
@@ -58,7 +60,7 @@ public class FeedPanel extends JPanel {
     // Rebuild order + bind
     content.removeAll();
     for (Post p : now) {
-      PostCard card = cards.computeIfAbsent(p.id(), id -> new PostCard(controller));
+      PostCard card = cards.computeIfAbsent(p.id(), id -> new PostCard(controller, session));
       card.bind(p);
       content.add(card);
       content.add(Box.createVerticalStrut(8));

@@ -107,7 +107,7 @@ public class MainWindow extends JFrame {
     setLayout(new BorderLayout());
 
     var top = new TopBar(postController, authController, bus, session);
-    var feed = new FeedPanel(postController, bus);
+    var feed = new FeedPanel(postController, session, bus);
     var sidebar = new SidebarPanel(postController, bus, session);
 
     var split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sidebar, feed);

@@ -2,6 +2,7 @@ package org.campusboard.sgs.view;
 
 import org.campusboard.sgs.controller.PostController;
 import org.campusboard.sgs.model.*;
+import org.campusboard.sgs.util.Session;
 import javax.swing.*;
 import java.awt.*;
 import java.time.Duration;
@@ -9,6 +10,7 @@ import java.time.Instant;
 
 public class PostCard extends JPanel {
   private final PostController controller;
+  private final Session session;
   private Post post;
 
   private JLabel titleLabel;
@@ -17,14 +19,16 @@ public class PostCard extends JPanel {
   private JLabel timestampLabel;
   private JLabel categoryBadge;
   private JButton likeButton;
+  private JButton deleteButton;
 
   private static final Color FAU_NAVY = new Color(0, 51, 102);
   private static final Color FAU_RED = new Color(206, 17, 65);
   private static final Color CARD_BG = Color.WHITE;
   private static final Color HOVER_BG = new Color(248, 249, 250);
 
-  public PostCard(PostController controller) {
+  public PostCard(PostController controller, Session session) {
     this.controller = controller;
+    this.session = session;
     setLayout(new BorderLayout(10, 10));
     setBackground(CARD_BG);
     setBorder(BorderFactory.createCompoundBorder(
@@ -50,6 +54,22 @@ public class PostCard extends JPanel {
     timestampLabel.setText(formatTime(post.createdAt()));
     categoryBadge.setText(formatCategory(post.category()));
     likeButton.setText("♥ " + post.likeCount());
+
+    // Update delete button visibility based on permissions
+    deleteButton.setVisible(canDelete(post));
+  }
+
+  private boolean canDelete(Post post) {
+    if (!session.isAuthenticated()) return false;
+
+    Role role = session.role();
+    String currentUser = session.user().username();
+
+    // Only admin can delete any post
+    if (role == Role.ADMIN) return true;
+
+    // Post author (student, staff, or guest) can delete their own post
+    return post.author().equals(currentUser);
   }
 
   private JPanel createHeader() {
@@ -130,9 +150,47 @@ public class PostCard extends JPanel {
       public void mouseExited(java.awt.event.MouseEvent e) { likeButton.setForeground(Color.GRAY); }
     });
 
+    deleteButton = new JButton("🗑 Delete");
+    deleteButton.setFont(new Font("Arial", Font.PLAIN, 12));
+    deleteButton.setForeground(FAU_RED);
+    deleteButton.setBackground(CARD_BG);
+    deleteButton.setBorderPainted(true);
+    deleteButton.setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory.createLineBorder(FAU_RED, 1),
+        BorderFactory.createEmptyBorder(3, 8, 3, 8)
+    ));
+    deleteButton.setFocusPainted(false);
+    deleteButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    deleteButton.addActionListener(e -> handleDelete());
+
+    deleteButton.addMouseListener(new java.awt.event.MouseAdapter() {
+      public void mouseEntered(java.awt.event.MouseEvent e) {
+        deleteButton.setBackground(new Color(255, 240, 240));
+      }
+      public void mouseExited(java.awt.event.MouseEvent e) {
+        deleteButton.setBackground(CARD_BG);
+      }
+    });
+
     footer.add(likeButton);
+    footer.add(Box.createHorizontalStrut(10));
+    footer.add(deleteButton);
 
     return footer;
+  }
+
+  private void handleDelete() {
+    int confirm = JOptionPane.showConfirmDialog(
+        this,
+        "Are you sure you want to delete this post?\n\"" + post.title() + "\"",
+        "Confirm Delete",
+        JOptionPane.YES_NO_OPTION,
+        JOptionPane.WARNING_MESSAGE
+    );
+
+    if (confirm == JOptionPane.YES_OPTION) {
+      controller.delete(post);
+    }
   }
 
   private String formatTime(Instant time) {
