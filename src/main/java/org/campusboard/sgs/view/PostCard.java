@@ -19,6 +19,7 @@ public class PostCard extends JPanel {
   private JLabel timestampLabel;
   private JLabel categoryBadge;
   private JButton likeButton;
+  private JButton dislikeButton;
   private JButton deleteButton;
 
   private static final Color FAU_NAVY = new Color(0, 51, 102);
@@ -54,6 +55,7 @@ public class PostCard extends JPanel {
     timestampLabel.setText(formatTime(post.createdAt()));
     categoryBadge.setText(formatCategory(post.category()));
     likeButton.setText("♥ " + post.likeCount());
+    dislikeButton.setText("👎 " + post.dislikeCount());
 
     // Update delete button visibility based on permissions
     deleteButton.setVisible(canDelete(post));
@@ -150,6 +152,20 @@ public class PostCard extends JPanel {
       public void mouseExited(java.awt.event.MouseEvent e) { likeButton.setForeground(Color.GRAY); }
     });
 
+    dislikeButton = new JButton("👎 0");
+    dislikeButton.setFont(new Font("Arial", Font.PLAIN, 13));
+    dislikeButton.setForeground(Color.GRAY);
+    dislikeButton.setBackground(CARD_BG);
+    dislikeButton.setBorderPainted(false);
+    dislikeButton.setFocusPainted(false);
+    dislikeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    dislikeButton.addActionListener(e -> controller.toggleDislike(post));
+
+    dislikeButton.addMouseListener(new java.awt.event.MouseAdapter() {
+      public void mouseEntered(java.awt.event.MouseEvent e) { dislikeButton.setForeground(FAU_RED); }
+      public void mouseExited(java.awt.event.MouseEvent e) { dislikeButton.setForeground(Color.GRAY); }
+    });
+
     deleteButton = new JButton("🗑 Delete");
     deleteButton.setFont(new Font("Arial", Font.PLAIN, 12));
     deleteButton.setForeground(FAU_RED);
@@ -173,6 +189,8 @@ public class PostCard extends JPanel {
     });
 
     footer.add(likeButton);
+    footer.add(Box.createHorizontalStrut(10));
+    footer.add(dislikeButton);
     footer.add(Box.createHorizontalStrut(10));
     footer.add(deleteButton);
 
