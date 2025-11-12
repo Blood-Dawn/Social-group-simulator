@@ -55,21 +55,8 @@ public class PostCard extends JPanel {
     categoryBadge.setText(formatCategory(post.category()));
     likeButton.setText("♥ " + post.likeCount());
 
-    // Update delete button visibility based on permissions
-    deleteButton.setVisible(canDelete(post));
-  }
-
-  private boolean canDelete(Post post) {
-    if (!session.isAuthenticated()) return false;
-
-    Role role = session.role();
-    String currentUser = session.user().username();
-
-    // Only admin can delete any post
-    if (role == Role.ADMIN) return true;
-
-    // Post author (student, staff, or guest) can delete their own post
-    return post.author().equals(currentUser);
+    // Update delete button visibility based on centralized permission check
+    deleteButton.setVisible(controller.canModifyPost(post));
   }
 
   private JPanel createHeader() {
@@ -136,6 +123,7 @@ public class PostCard extends JPanel {
     JPanel footer = new JPanel(new FlowLayout(FlowLayout.LEFT));
     footer.setOpaque(false);
 
+    // TODO: Replace emoji with proper icon resource (Task 8: Icon Assets)
     likeButton = new JButton("♥ 0");
     likeButton.setFont(new Font("Arial", Font.PLAIN, 13));
     likeButton.setForeground(Color.GRAY);
@@ -150,6 +138,7 @@ public class PostCard extends JPanel {
       public void mouseExited(java.awt.event.MouseEvent e) { likeButton.setForeground(Color.GRAY); }
     });
 
+    // TODO: Replace emoji with proper icon resource (Task 8: Icon Assets)
     deleteButton = new JButton("🗑 Delete");
     deleteButton.setFont(new Font("Arial", Font.PLAIN, 12));
     deleteButton.setForeground(FAU_RED);

@@ -108,7 +108,7 @@ public class PostController {
     return users.find(username).isPresent();
   }
 
-  private boolean canModifyPost(Post post) {
+  public boolean canModifyPost(Post post) {
     if (!session.isAuthenticated())
       return false;
     Role role = session.role();

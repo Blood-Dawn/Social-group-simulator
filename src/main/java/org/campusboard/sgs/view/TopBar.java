@@ -99,6 +99,7 @@ public class TopBar extends JPanel {
     JPanel panel = new JPanel(new BorderLayout(5, 0));
     panel.setOpaque(false);
 
+    // TODO: Replace emoji with proper icon resource (Task 8: Icon Assets)
     JLabel searchIcon = new JLabel("🔍");
     searchIcon.setFont(new Font("Arial", Font.PLAIN, 16));
 
