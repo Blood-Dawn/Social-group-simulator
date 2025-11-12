@@ -112,7 +112,8 @@ public class PostController {
     if (!session.isAuthenticated())
       return false;
     Role role = session.role();
-    if (role == Role.ADMIN || role == Role.STAFF)
+    // Only ADMIN can modify any post, others can only modify their own
+    if (role == Role.ADMIN)
       return true;
     return post.author().equals(session.user().username());
   }

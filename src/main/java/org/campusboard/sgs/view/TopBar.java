@@ -33,6 +33,7 @@ public class TopBar extends JPanel {
         BorderFactory.createMatteBorder(0, 0, 2, 0, FAU_NAVY),
         BorderFactory.createEmptyBorder(10, 15, 10, 15)));
 
+    add(createLogoPanel(), BorderLayout.WEST);
     add(createSearchPanel(), BorderLayout.CENTER);
     add(createAuthPanel(), BorderLayout.EAST);
 
@@ -42,6 +43,56 @@ public class TopBar extends JPanel {
     bus.subscribe(Events.SHOW_LOGIN, e -> showLoginDialog());
 
     updateAuthUI();
+  }
+
+  private JPanel createLogoPanel() {
+    JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    panel.setOpaque(false);
+
+    // Create circular logo badge
+    JPanel logoBadge = new JPanel() {
+      @Override
+      protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // Draw circle
+        g2d.setColor(FAU_NAVY);
+        g2d.fillOval(0, 0, 40, 40);
+
+        // Draw text
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(new Font("Arial", Font.BOLD, 18));
+        FontMetrics fm = g2d.getFontMetrics();
+        String text = "CB";
+        int textWidth = fm.stringWidth(text);
+        int textHeight = fm.getAscent();
+        int x = (40 - textWidth) / 2;
+        int y = (40 - textHeight) / 2 + textHeight;
+        g2d.drawString(text, x, y);
+
+        g2d.dispose();
+      }
+
+      @Override
+      public Dimension getPreferredSize() {
+        return new Dimension(40, 40);
+      }
+    };
+    logoBadge.setOpaque(false);
+    logoBadge.setToolTipText("CampusBoard - Social Hub for College Campuses");
+
+    panel.add(logoBadge);
+    panel.add(Box.createHorizontalStrut(10));
+
+    // Add app title
+    JLabel titleLabel = new JLabel("CampusBoard");
+    titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+    titleLabel.setForeground(FAU_NAVY);
+    panel.add(titleLabel);
+
+    return panel;
   }
 
   private JPanel createSearchPanel() {
