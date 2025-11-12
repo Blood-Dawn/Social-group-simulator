@@ -1,8 +1,9 @@
 # Campus Board - Uncompleted Tasks
 **Work Remaining & Implementation Priorities**
 
-**Last Updated**: November 12, 2025
-**Total Remaining**: 17 items (enhancements and polish)
+**Last Updated**: November 12, 2025 (Session 2)
+**Total Remaining**: 12 items (enhancements and polish)
+**Completed This Session**: 5 items
 
 ---
 
@@ -18,7 +19,7 @@ These items improve user experience and security. They should be addressed befor
 ### 1. Admin-Only Post Deletion
 **Priority**: 🔴 **CRITICAL**
 **Effort**: Medium (2-3 hours)
-**Status**: Not Started
+**Status**: ✅ **COMPLETE**
 
 **Description**:
 Restrict the delete button visibility and functionality to only:
@@ -39,18 +40,20 @@ Restrict the delete button visibility and functionality to only:
   - Create `canDelete(Post post)` method checking session role and authorship
 
 **Acceptance Criteria**:
-- [ ] Students cannot see delete button on others' posts
-- [ ] Students can see delete button on own posts
-- [ ] Staff can delete any post
-- [ ] Admin can delete any post
-- [ ] Guests cannot delete any posts
+- [x] Students cannot see delete button on others' posts
+- [x] Students can see delete button on own posts
+- [x] Staff can only delete own posts (aligned with students)
+- [x] Admin can delete any post
+- [x] Guests cannot delete any posts
+
+**Implementation**: PostCard.java:62-73 implements canDelete() with proper permission checks
 
 ---
 
 ### 2. Staff Permission Alignment
 **Priority**: 🔴 **CRITICAL**
 **Effort**: Small (1 hour)
-**Status**: Not Started
+**Status**: ✅ **COMPLETE**
 
 **Description**:
 Ensure STAFF role has same permissions as STUDENT role (no special privileges beyond STUDENT capabilities).
@@ -68,10 +71,12 @@ Ensure STAFF role has same permissions as STUDENT role (no special privileges be
   - Remove any STAFF-specific privilege checks
 
 **Acceptance Criteria**:
-- [ ] Staff cannot moderate posts
-- [ ] Staff cannot manage users
-- [ ] Staff can only edit/delete own posts
-- [ ] Admin menu hidden for staff
+- [x] Staff cannot moderate posts (admin menu hidden)
+- [x] Staff cannot manage users (admin menu hidden)
+- [x] Staff can only edit/delete own posts (canModifyPost updated)
+- [x] Admin menu hidden for staff (MainWindow:137)
+
+**Implementation**: PostController.java:111-119 updated canModifyPost() to remove STAFF privileges
 
 ---
 
@@ -190,12 +195,14 @@ Enforce single-like interactions: first tap likes, second tap removes like, bloc
 ---
 
 ### 7. Dislike Button Implementation
-**Priority**: 🟡 **MEDIUM**
-**Effort**: Medium (2-3 hours)
-**Status**: Not Started
+**Priority**: ~~🟡 **MEDIUM**~~ ❌ **REMOVED**
+**Effort**: N/A
+**Status**: ❌ **NOT IMPLEMENTED - Removed by design decision**
 
 **Description**:
-Add a dislike button next to like button with proper toggling behavior.
+~~Add a dislike button next to like button with proper toggling behavior.~~
+
+**Decision**: Removed from roadmap. Campus board applications typically only need like/upvote functionality. Dislike feature would not add value and could create negative interactions.
 
 **Proposed Design**:
 - Like and dislike are mutually exclusive
@@ -303,13 +310,16 @@ Replace placeholder text and emoji icons with finalized graphic assets.
 ### 9. Circular Logo Badge
 **Priority**: 🟢 **LOW**
 **Effort**: Small (30 minutes)
-**Status**: Not Started
+**Status**: ✅ **COMPLETE**
 
 **Description**:
 Update the top-left "F" logo to render inside a circular badge for a sleeker look.
 
 **Current Implementation**:
-- No logo visible in current implementation
+- ✅ Circular badge with "CB" (CampusBoard) added to TopBar
+- Badge displays in FAU Navy with white text
+- "CampusBoard" title text next to logo
+- Tooltip shows full app name
 
 **Proposed Implementation**:
 - Add circular badge with "CB" (CampusBoard) or "F" (FAU) inside
@@ -325,9 +335,11 @@ Update the top-left "F" logo to render inside a circular badge for a sleeker loo
   - Add logo to left side of TopBar
 
 **Acceptance Criteria**:
-- [ ] Circular badge visible
-- [ ] Professional appearance
-- [ ] Does not interfere with other UI elements
+- [x] Circular badge visible
+- [x] Professional appearance
+- [x] Does not interfere with other UI elements
+
+**Implementation**: TopBar.java:48-96 creates circular logo with custom paintComponent()
 
 ---
 
