@@ -12,7 +12,6 @@ public final class Post {
   private final Instant createdAt;
   private Instant updatedAt;
   private final Set<String> likedBy = new HashSet<>();
-  private final Set<String> dislikedBy = new HashSet<>();
 
   public Post(UUID id, String title, String body, Category category, String author) {
     this.id = id == null ? UUID.randomUUID() : id;
@@ -32,7 +31,6 @@ public final class Post {
   public Instant createdAt() { return createdAt; }
   public Instant updatedAt() { return updatedAt; }
   public int likeCount() { return likedBy.size(); }
-  public int dislikeCount() { return dislikedBy.size(); }
 
   public void setTitle(String title) {
     this.title = Objects.requireNonNull(title, "title");
@@ -51,7 +49,6 @@ public final class Post {
 
   public boolean toggleLike(String userId) {
     Objects.requireNonNull(userId, "userId");
-    dislikedBy.remove(userId); // Remove dislike if present (mutually exclusive)
     if (likedBy.remove(userId)) {
       updatedAt = Instant.now();
       return false;
@@ -63,22 +60,6 @@ public final class Post {
 
   public boolean isLikedBy(String userId) {
     return likedBy.contains(userId);
-  }
-
-  public boolean toggleDislike(String userId) {
-    Objects.requireNonNull(userId, "userId");
-    likedBy.remove(userId); // Remove like if present (mutually exclusive)
-    if (dislikedBy.remove(userId)) {
-      updatedAt = Instant.now();
-      return false;
-    }
-    dislikedBy.add(userId);
-    updatedAt = Instant.now();
-    return true;
-  }
-
-  public boolean isDislikedBy(String userId) {
-    return dislikedBy.contains(userId);
   }
 
   @Override

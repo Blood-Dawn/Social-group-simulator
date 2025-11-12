@@ -80,14 +80,6 @@ public class PostController {
     undoManager.execute(new LikePostCommand(posts, bus, p, session.user().username()));
   }
 
-  public void toggleDislike(Post p) {
-    if (!session.isAuthenticated()) {
-      bus.publish(Events.SHOW_LOGIN, null);
-      return;
-    }
-    undoManager.execute(new DislikePostCommand(posts, bus, p, session.user().username()));
-  }
-
   public void undo() {
     undoManager.undo();
   }
