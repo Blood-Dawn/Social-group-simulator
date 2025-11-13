@@ -274,9 +274,9 @@ Campus Board is a Java Swing desktop application serving as a digital bulletin b
 ## 🚨 URGENT Tasks (Post-Launch Polish) - 9 Items
 
 ### Priority 1: Security & Permissions
-- [ ] **Admin-Only Post Deletion**: Restrict delete button to admin/staff/owner only
-- [ ] **Staff Permission Alignment**: Ensure staff = student privileges (no elevation)
-- [ ] **Admin-Only Sidebar Tools**: Hide admin menu for non-admin users
+- ✅ **Admin-Only Post Deletion**: Restrict delete button to admin/staff/owner only
+- ✅ **Staff Permission Alignment**: Ensure staff = student privileges (no elevation)
+- ✅ **Admin-Only Sidebar Tools**: Hide admin menu for non-admin users
 
 ### Priority 2: User Experience
 - ✅ **Preserve Scroll Position on Like**: Already implemented in FeedPanel:59
@@ -284,7 +284,7 @@ Campus Board is a Java Swing desktop application serving as a digital bulletin b
 
 ### Priority 3: Visual Polish
 - [ ] **Icon Assets**: Replace placeholder icons with finalized artwork
-- [ ] **Circular Logo Badge**: Update top-left "F" logo to circular badge
+- ✅ **Circular Logo Badge**: Update top-left "F" logo to circular badge
 - [ ] **Role-Based UI Theming**: Introduce unique themes per user role
 
 ---
