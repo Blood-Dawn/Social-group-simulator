@@ -28,30 +28,30 @@ icons/
 ## Required Icons
 
 ### actions/ (Action Buttons)
-- [ ] `like-outline.png` - Heart outline for unliked state (16x16, 24x24)
-- [ ] `like-filled.png` - Filled heart for liked state (16x16, 24x24)
-- [ ] `delete.png` - Trash can icon (16x16, 24x24)
-- [ ] `edit.png` - Pencil icon for editing (16x16, 24x24)
-- [ ] `login.png` - User silhouette for login (16x16)
-- [ ] `logout.png` - Door with arrow for logout (16x16)
+- [x] `like-outline.png` - Heart outline for unliked state (16x16, 24x24)
+- [x] `like-filled.png` - Filled heart for liked state (16x16, 24x24)
+- [x] `delete.png` - Trash can icon (16x16, 24x24)
+- [x] `edit.png` - Pencil icon for editing (16x16, 24x24)
+- [x] `login.png` - User silhouette for login (16x16)
+- [x] `logout.png` - Door with arrow for logout (16x16)
 
 ### categories/ (Category Filters)
-- [ ] `all.png` - Grid icon for all posts (24x24, 32x32)
-- [ ] `announcements.png` - Megaphone icon (24x24, 32x32)
-- [ ] `study-groups.png` - Book or group icon (24x24, 32x32)
-- [ ] `events.png` - Calendar icon (24x24, 32x32)
+- [x] `all.png` - Grid icon for all posts (24x24, 32x32)
+- [x] `announcements.png` - Megaphone icon (24x24, 32x32)
+- [x] `study-groups.png` - Book or group icon (24x24, 32x32)
+- [x] `events.png` - Calendar icon (24x24, 32x32)
 - [ ] `lost-found.png` - Magnifying glass or key icon (24x24, 32x32)
-- [ ] `trending.png` - Flame or arrow up icon (24x24, 32x32)
+- [x] `trending.png` - Flame or arrow up icon (24x24, 32x32)
 
 ### admin/ (Admin Menu)
 - [ ] `manage-users.png` - Users/group icon (16x16)
-- [ ] `moderate.png` - Gavel or shield icon (16x16)
-- [ ] `reports.png` - Bar chart icon (16x16)
+- [x] `moderate.png` - Gavel or shield icon (16x16)
+- [x] `reports.png` - Bar chart icon (16x16)
 
 ### ui/ (UI Elements)
-- [ ] `search.png` - Magnifying glass (16x16)
-- [ ] `user.png` - User profile icon (16x16, 32x32)
-- [ ] `clock.png` - Clock icon for timestamps (12x12, 16x16)
+- [x] `search.png` - Magnifying glass (16x16)
+- [x] `user.png` - User profile icon (16x16, 32x32)
+- [x] `clock.png` - Clock icon for timestamps (12x12, 16x16)
 
 ## Icon Sources
 
