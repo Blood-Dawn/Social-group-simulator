@@ -2,6 +2,7 @@ package org.campusboard.sgs.view;
 
 import org.campusboard.sgs.controller.PostController;
 import org.campusboard.sgs.model.*;
+import org.campusboard.sgs.util.IconLoader;
 import org.campusboard.sgs.util.Session;
 import javax.swing.*;
 import java.awt.*;
@@ -25,6 +26,8 @@ public class PostCard extends JPanel {
   private static final Color FAU_RED = new Color(206, 17, 65);
   private static final Color CARD_BG = Color.WHITE;
   private static final Color HOVER_BG = new Color(248, 249, 250);
+  private static final ImageIcon LIKE_ICON = IconLoader.loadOrPlaceholder("actions", "like-outline", 16, FAU_NAVY);
+  private static final ImageIcon DELETE_ICON = IconLoader.loadOrPlaceholder("actions", "delete", 16, FAU_RED);
 
   public PostCard(PostController controller, Session session) {
     this.controller = controller;
@@ -32,13 +35,17 @@ public class PostCard extends JPanel {
     setLayout(new BorderLayout(10, 10));
     setBackground(CARD_BG);
     setBorder(BorderFactory.createCompoundBorder(
-      BorderFactory.createLineBorder(new Color(220, 220, 220), 1),
-      BorderFactory.createEmptyBorder(15, 15, 15, 15)
-    ));
+        BorderFactory.createLineBorder(new Color(220, 220, 220), 1),
+        BorderFactory.createEmptyBorder(15, 15, 15, 15)));
 
     addMouseListener(new java.awt.event.MouseAdapter() {
-      public void mouseEntered(java.awt.event.MouseEvent e) { setBackground(HOVER_BG); }
-      public void mouseExited(java.awt.event.MouseEvent e) { setBackground(CARD_BG); }
+      public void mouseEntered(java.awt.event.MouseEvent e) {
+        setBackground(HOVER_BG);
+      }
+
+      public void mouseExited(java.awt.event.MouseEvent e) {
+        setBackground(CARD_BG);
+      }
     });
 
     add(createHeader(), BorderLayout.NORTH);
@@ -53,7 +60,11 @@ public class PostCard extends JPanel {
     authorLabel.setText("@" + post.author());
     timestampLabel.setText(formatTime(post.createdAt()));
     categoryBadge.setText(formatCategory(post.category()));
-    likeButton.setText("♥ " + post.likeCount());
+    likeButton.setText(String.valueOf(post.likeCount()));
+    likeButton.setEnabled(session.isAuthenticated());
+    likeButton.setToolTipText(session.isAuthenticated()
+        ? "Toggle like"
+        : "Log in to like posts");
 
     // Update delete button visibility based on centralized permission check
     deleteButton.setVisible(controller.canModifyPost(post));
@@ -123,8 +134,10 @@ public class PostCard extends JPanel {
     JPanel footer = new JPanel(new FlowLayout(FlowLayout.LEFT));
     footer.setOpaque(false);
 
-    // TODO: Replace emoji with proper icon resource (Task 8: Icon Assets)
-    likeButton = new JButton("♥ 0");
+    likeButton = new JButton("0");
+    likeButton.setIcon(LIKE_ICON);
+    likeButton.setHorizontalTextPosition(SwingConstants.RIGHT);
+    likeButton.setIconTextGap(6);
     likeButton.setFont(new Font("Arial", Font.PLAIN, 13));
     likeButton.setForeground(Color.GRAY);
     likeButton.setBackground(CARD_BG);
@@ -134,20 +147,26 @@ public class PostCard extends JPanel {
     likeButton.addActionListener(e -> controller.toggleLike(post));
 
     likeButton.addMouseListener(new java.awt.event.MouseAdapter() {
-      public void mouseEntered(java.awt.event.MouseEvent e) { likeButton.setForeground(FAU_RED); }
-      public void mouseExited(java.awt.event.MouseEvent e) { likeButton.setForeground(Color.GRAY); }
+      public void mouseEntered(java.awt.event.MouseEvent e) {
+        likeButton.setForeground(FAU_RED);
+      }
+
+      public void mouseExited(java.awt.event.MouseEvent e) {
+        likeButton.setForeground(Color.GRAY);
+      }
     });
 
-    // TODO: Replace emoji with proper icon resource (Task 8: Icon Assets)
-    deleteButton = new JButton("🗑 Delete");
+    deleteButton = new JButton("Delete");
+    deleteButton.setIcon(DELETE_ICON);
+    deleteButton.setHorizontalTextPosition(SwingConstants.RIGHT);
+    deleteButton.setIconTextGap(6);
     deleteButton.setFont(new Font("Arial", Font.PLAIN, 12));
     deleteButton.setForeground(FAU_RED);
     deleteButton.setBackground(CARD_BG);
     deleteButton.setBorderPainted(true);
     deleteButton.setBorder(BorderFactory.createCompoundBorder(
         BorderFactory.createLineBorder(FAU_RED, 1),
-        BorderFactory.createEmptyBorder(3, 8, 3, 8)
-    ));
+        BorderFactory.createEmptyBorder(3, 8, 3, 8)));
     deleteButton.setFocusPainted(false);
     deleteButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     deleteButton.addActionListener(e -> handleDelete());
@@ -156,6 +175,7 @@ public class PostCard extends JPanel {
       public void mouseEntered(java.awt.event.MouseEvent e) {
         deleteButton.setBackground(new Color(255, 240, 240));
       }
+
       public void mouseExited(java.awt.event.MouseEvent e) {
         deleteButton.setBackground(CARD_BG);
       }
@@ -174,8 +194,7 @@ public class PostCard extends JPanel {
         "Are you sure you want to delete this post?\n\"" + post.title() + "\"",
         "Confirm Delete",
         JOptionPane.YES_NO_OPTION,
-        JOptionPane.WARNING_MESSAGE
-    );
+        JOptionPane.WARNING_MESSAGE);
 
     if (confirm == JOptionPane.YES_OPTION) {
       controller.delete(post);
@@ -183,21 +202,27 @@ public class PostCard extends JPanel {
   }
 
   private String formatTime(Instant time) {
-    if (time == null) return "Unknown";
+    if (time == null)
+      return "Unknown";
     Duration dur = Duration.between(time, Instant.now());
     long mins = dur.toMinutes();
     long hours = dur.toHours();
     long days = dur.toDays();
 
-    if (mins < 1) return "Just now";
-    if (mins < 60) return mins + "m ago";
-    if (hours < 24) return hours + "h ago";
-    if (days < 7) return days + "d ago";
+    if (mins < 1)
+      return "Just now";
+    if (mins < 60)
+      return mins + "m ago";
+    if (hours < 24)
+      return hours + "h ago";
+    if (days < 7)
+      return days + "d ago";
     return days / 7 + "w ago";
   }
 
   private String formatCategory(Category cat) {
-    if (cat == null) return "General";
+    if (cat == null)
+      return "General";
     return switch (cat) {
       case ANNOUNCEMENTS -> "Announcements";
       case STUDY_GROUPS -> "Study Groups";

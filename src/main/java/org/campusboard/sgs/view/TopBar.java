@@ -99,9 +99,9 @@ public class TopBar extends JPanel {
     JPanel panel = new JPanel(new BorderLayout(5, 0));
     panel.setOpaque(false);
 
-    // TODO: Replace emoji with proper icon resource (Task 8: Icon Assets)
-    JLabel searchIcon = new JLabel("🔍");
-    searchIcon.setFont(new Font("Arial", Font.PLAIN, 16));
+    ImageIcon searchIcon = IconLoader.loadOrPlaceholder("ui", "search", 16, FAU_NAVY);
+    JLabel searchIconLabel = new JLabel(searchIcon);
+    searchIconLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 6));
 
     searchField = new JTextField();
     searchField.setName("searchField");
@@ -137,7 +137,7 @@ public class TopBar extends JPanel {
       }
     });
 
-    panel.add(searchIcon, BorderLayout.WEST);
+    panel.add(searchIconLabel, BorderLayout.WEST);
     panel.add(searchField, BorderLayout.CENTER);
 
     return panel;
