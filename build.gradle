@@ -18,6 +18,40 @@ application {
   mainClass = 'org.campusboard.sgs.Main'
 }
 
+def isWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
+
+tasks.register('packExe', Exec) {
+  group = 'distribution'
+  description = 'Builds a Windows .exe installer using jpackage'
+  enabled = isWindows
+  dependsOn installDist
+  doFirst {
+    def appDir = file("$buildDir/install/social-group-simulator")
+    def iconFile = file("src/main/resources/icons/ui/CB_Icon.png")
+    if (!appDir.exists()) {
+      throw new GradleException("App install directory not found: $appDir")
+    }
+    def cmd = []
+    cmd << 'jpackage'
+    cmd << '--type' << 'exe'
+    cmd << '--name' << 'CampusBoard'
+    cmd << '--app-version' << '1.0.0'
+    cmd << '--description' << 'CampusBoard - Social Group Simulator'
+    cmd << '--vendor' << 'CampusBoard'
+    cmd << '--input' << new File(appDir, "lib").absolutePath
+    cmd << '--main-jar' << 'social-group-simulator.jar'
+    cmd << '--main-class' << 'org.campusboard.sgs.Main'
+    cmd << '--dest' << file("$buildDir/installer").absolutePath
+    cmd << '--win-menu'
+    cmd << '--win-dir-chooser'
+    cmd << '--win-menu-group' << 'CampusBoard'
+    cmd << '--win-shortcut'
+    // jpackage requires .ico on Windows; skip if not present
+    println "Running: ${cmd.join(' ')}"
+    commandLine cmd
+  }
+}
+
 java {
   toolchain {
     languageVersion = JavaLanguageVersion.of(21)
