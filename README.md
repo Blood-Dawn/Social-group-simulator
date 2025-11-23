@@ -77,8 +77,8 @@ src/main/java/org/campusboard/sgs/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Java 17 or higher (with toolchain support)
-- Gradle 7.0 or higher (wrapper included)
+- Java 21 (auto-downloaded via Gradle toolchain)
+- Gradle 8.6 or higher (wrapper included)
 
 ### Building the Project
 ```bash

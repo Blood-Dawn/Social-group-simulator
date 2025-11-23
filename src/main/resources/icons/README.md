@@ -40,11 +40,11 @@ icons/
 - [x] `announcements.png` - Megaphone icon (24x24, 32x32)
 - [x] `study-groups.png` - Book or group icon (24x24, 32x32)
 - [x] `events.png` - Calendar icon (24x24, 32x32)
-- [ ] `lost-found.png` - Magnifying glass or key icon (24x24, 32x32)
+- [x] `lost-found.png` - Magnifying glass or key icon (24x24, 32x32)
 - [x] `trending.png` - Flame or arrow up icon (24x24, 32x32)
 
 ### admin/ (Admin Menu)
-- [ ] `manage-users.png` - Users/group icon (16x16)
+- [x] `manage-users.png` - Users/group icon (16x16)
 - [x] `moderate.png` - Gavel or shield icon (16x16)
 - [x] `reports.png` - Bar chart icon (16x16)
 
