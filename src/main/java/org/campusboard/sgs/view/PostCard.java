@@ -27,6 +27,7 @@ public class PostCard extends JPanel {
   private static final Color CARD_BG = Color.WHITE;
   private static final Color HOVER_BG = new Color(248, 249, 250);
   private static final ImageIcon LIKE_ICON = IconLoader.loadOrPlaceholder("actions", "like-outline", 16, FAU_NAVY);
+  private static final ImageIcon LIKE_FILLED_ICON = IconLoader.loadOrPlaceholder("actions", "like-filled", 16, FAU_RED);
   private static final ImageIcon DELETE_ICON = IconLoader.loadOrPlaceholder("actions", "delete", 16, FAU_RED);
 
   public PostCard(PostController controller, Session session) {
@@ -60,11 +61,11 @@ public class PostCard extends JPanel {
     authorLabel.setText("@" + post.author());
     timestampLabel.setText(formatTime(post.createdAt()));
     categoryBadge.setText(formatCategory(post.category()));
-    likeButton.setText(String.valueOf(post.likeCount()));
     likeButton.setEnabled(session.isAuthenticated());
     likeButton.setToolTipText(session.isAuthenticated()
         ? "Toggle like"
         : "Log in to like posts");
+    refreshLikeButton();
 
     // Update delete button visibility based on centralized permission check
     deleteButton.setVisible(controller.canModifyPost(post));
@@ -144,7 +145,10 @@ public class PostCard extends JPanel {
     likeButton.setBorderPainted(false);
     likeButton.setFocusPainted(false);
     likeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-    likeButton.addActionListener(e -> controller.toggleLike(post));
+    likeButton.addActionListener(e -> {
+      controller.toggleLike(post);
+      refreshLikeButton();
+    });
 
     likeButton.addMouseListener(new java.awt.event.MouseAdapter() {
       public void mouseEntered(java.awt.event.MouseEvent e) {
@@ -152,7 +156,7 @@ public class PostCard extends JPanel {
       }
 
       public void mouseExited(java.awt.event.MouseEvent e) {
-        likeButton.setForeground(Color.GRAY);
+        refreshLikeButton();
       }
     });
 
@@ -229,5 +233,19 @@ public class PostCard extends JPanel {
       case EVENTS -> "Events";
       case LOST_FOUND -> "Lost & Found";
     };
+  }
+
+  private void refreshLikeButton() {
+    if (likeButton == null)
+      return;
+    likeButton.setText(post == null ? "0" : String.valueOf(post.likeCount()));
+    boolean liked = isLikedByCurrentUser();
+    likeButton.setIcon(liked ? LIKE_FILLED_ICON : LIKE_ICON);
+    likeButton.setForeground(liked ? FAU_RED : Color.GRAY);
+  }
+
+  private boolean isLikedByCurrentUser() {
+    return session.isAuthenticated() && post != null && session.user() != null
+        && post.isLikedBy(session.user().username());
   }
 }

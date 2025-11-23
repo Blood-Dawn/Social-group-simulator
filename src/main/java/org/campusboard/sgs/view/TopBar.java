@@ -1,6 +1,7 @@
 package org.campusboard.sgs.view;
 
 import org.campusboard.sgs.controller.*;
+import org.campusboard.sgs.model.Role;
 import org.campusboard.sgs.util.*;
 import javax.swing.*;
 import java.awt.*;
@@ -14,8 +15,10 @@ public class TopBar extends JPanel {
   private JTextField searchField;
   private JButton loginButton;
   private JLabel usernameLabel;
+  private JLabel roleBadgeLabel;
   private JButton logoutButton;
   private JPanel authPanel;
+  private final ImageIcon adminBadgeIcon = IconLoader.loadOrPlaceholder("admin", "moderate", 16, FAU_RED);
 
   private static final Color FAU_NAVY = new Color(0, 51, 102);
   private static final Color FAU_RED = new Color(206, 17, 65);
@@ -162,6 +165,10 @@ public class TopBar extends JPanel {
     usernameLabel.setFont(new Font("Arial", Font.BOLD, 13));
     usernameLabel.setForeground(FAU_NAVY);
 
+    roleBadgeLabel = new JLabel();
+    roleBadgeLabel.setFont(new Font("Arial", Font.BOLD, 12));
+    roleBadgeLabel.setForeground(FAU_NAVY);
+
     // Logout button
     logoutButton = new JButton("Logout");
     logoutButton.setFont(new Font("Arial", Font.PLAIN, 12));
@@ -181,11 +188,15 @@ public class TopBar extends JPanel {
   private void updateAuthUI() {
     SwingUtilities.invokeLater(() -> {
       authPanel.removeAll();
+      roleBadgeLabel.setVisible(false);
 
       if (session.isAuthenticated()) {
-        usernameLabel.setText("Welcome, " + session.user().username() +
-            " (" + session.user().role() + ")");
+        usernameLabel.setText("Welcome, " + session.user().username());
+        configureRoleBadge(session.role());
         authPanel.add(usernameLabel);
+        if (roleBadgeLabel.isVisible()) {
+          authPanel.add(roleBadgeLabel);
+        }
         authPanel.add(logoutButton);
       } else {
         authPanel.add(loginButton);
@@ -194,6 +205,25 @@ public class TopBar extends JPanel {
       authPanel.revalidate();
       authPanel.repaint();
     });
+  }
+
+  private void configureRoleBadge(Role role) {
+    if (role == null) {
+      roleBadgeLabel.setVisible(false);
+      return;
+    }
+
+    if (role == Role.ADMIN && adminBadgeIcon != null) {
+      roleBadgeLabel.setIcon(adminBadgeIcon);
+      roleBadgeLabel.setText("");
+      roleBadgeLabel.setToolTipText("Administrator privileges enabled");
+      roleBadgeLabel.setVisible(true);
+    } else {
+      roleBadgeLabel.setIcon(null);
+      roleBadgeLabel.setText("(" + role.name() + ")");
+      roleBadgeLabel.setToolTipText("Role: " + role.name());
+      roleBadgeLabel.setVisible(true);
+    }
   }
 
   private void showLoginDialog() {

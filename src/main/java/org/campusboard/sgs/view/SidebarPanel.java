@@ -12,11 +12,13 @@ public class SidebarPanel extends JPanel {
   private final EventBus bus;
   private final Session session;
   private JLabel userLabel;
+  private final ImageIcon adminRoleIcon = IconLoader.loadOrPlaceholder("admin", "moderate", 16, FAU_NAVY);
 
   private static final Color FAU_NAVY = new Color(0, 51, 102);
   private static final Color SIDEBAR_BG = new Color(245, 245, 245);
   private static final Color BUTTON_BG = Color.WHITE;
   private static final Color BUTTON_HOVER = new Color(225, 239, 254);
+  private static final int FILTER_ICON_SIZE = 20;
 
   public SidebarPanel(PostController controller, EventBus bus, Session session) {
     this.controller = controller;
@@ -57,28 +59,33 @@ public class SidebarPanel extends JPanel {
     panel.add(Box.createVerticalStrut(10));
 
     // All Posts
-    panel.add(createFilterButton("All Posts", new AllFilter()));
+    panel.add(createFilterButton("All Posts", new AllFilter(), loadCategoryIcon("all")));
     panel.add(Box.createVerticalStrut(5));
 
     // Category filters
-    panel.add(createFilterButton("Announcements", new CategoryFilter(Category.ANNOUNCEMENTS)));
+    panel.add(createFilterButton("Announcements", new CategoryFilter(Category.ANNOUNCEMENTS),
+        loadCategoryIcon("announcements")));
     panel.add(Box.createVerticalStrut(5));
-    panel.add(createFilterButton("Study Groups", new CategoryFilter(Category.STUDY_GROUPS)));
+    panel.add(createFilterButton("Study Groups", new CategoryFilter(Category.STUDY_GROUPS),
+        loadCategoryIcon("study-groups")));
     panel.add(Box.createVerticalStrut(5));
-    panel.add(createFilterButton("Events", new CategoryFilter(Category.EVENTS)));
+    panel.add(createFilterButton("Events", new CategoryFilter(Category.EVENTS),
+        loadCategoryIcon("events")));
     panel.add(Box.createVerticalStrut(5));
-    panel.add(createFilterButton("Lost & Found", new CategoryFilter(Category.LOST_FOUND)));
+    panel.add(createFilterButton("Lost & Found", new CategoryFilter(Category.LOST_FOUND),
+        loadCategoryIcon("lost-found")));
     panel.add(Box.createVerticalStrut(5));
 
     // Trending
     panel.add(Box.createVerticalStrut(10));
-    panel.add(createFilterButton("Trending", new TrendingFilter()));
+    panel.add(createFilterButton("Trending", new TrendingFilter(),
+        loadCategoryIcon("trending")));
     panel.add(Box.createVerticalStrut(5));
 
     return panel;
   }
 
-  private JButton createFilterButton(String text, FilterStrategy filter) {
+  private JButton createFilterButton(String text, FilterStrategy filter, ImageIcon icon) {
     JButton button = new JButton(text);
     button.setAlignmentX(Component.LEFT_ALIGNMENT);
     button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
@@ -86,6 +93,10 @@ public class SidebarPanel extends JPanel {
     button.setForeground(FAU_NAVY);
     button.setFont(new Font("Arial", Font.PLAIN, 13));
     button.setHorizontalAlignment(SwingConstants.LEFT);
+    if (icon != null) {
+      button.setIcon(icon);
+      button.setIconTextGap(10);
+    }
     button.setBorder(BorderFactory.createCompoundBorder(
         BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
         BorderFactory.createEmptyBorder(5, 10, 5, 10)));
@@ -105,6 +116,10 @@ public class SidebarPanel extends JPanel {
     button.addActionListener(e -> controller.setFilter(filter));
 
     return button;
+  }
+
+  private ImageIcon loadCategoryIcon(String name) {
+    return IconLoader.loadOrPlaceholder("categories", name, FILTER_ICON_SIZE, FAU_NAVY);
   }
 
   private JPanel createUserPanel() {
@@ -129,11 +144,23 @@ public class SidebarPanel extends JPanel {
     SwingUtilities.invokeLater(() -> {
       if (session.isAuthenticated()) {
         User user = session.user();
-        userLabel.setText("<html><b>Logged in as:</b><br>" +
-            user.username() + " (" + user.role() + ")</html>");
+        boolean admin = user.role() == Role.ADMIN && adminRoleIcon != null;
+        userLabel.setIcon(admin ? adminRoleIcon : null);
+        userLabel.setIconTextGap(8);
+        if (admin) {
+          userLabel.setText("<html><b>Logged in as:</b><br>" +
+              user.username() + "<br><span style='color:#666;'>Administrator</span></html>");
+          userLabel.setToolTipText("Administrator privileges enabled");
+        } else {
+          userLabel.setText("<html><b>Logged in as:</b><br>" +
+              user.username() + " (" + user.role() + ")</html>");
+          userLabel.setToolTipText(null);
+        }
       } else {
         userLabel.setText("<html><b>Guest mode</b><br>" +
             "Login to access<br>full features</html>");
+        userLabel.setIcon(null);
+        userLabel.setToolTipText(null);
       }
     });
   }
