@@ -41,11 +41,6 @@ public class Post {
     this(null, title, body, Category.ANNOUNCEMENTS, author == null ? null : author.username(), null, null);
   }
 
-  public Post(UUID id, String title, String body, Category category, String author, LocalDateTime createdAt,
-      Set<String> likedBy) {
-    this(id, title, body, category, author, createdAt, likedBy);
-  }
-
   @JsonCreator
   public Post(
       @JsonProperty("id") UUID id,
@@ -55,19 +50,13 @@ public class Post {
       @JsonProperty("author") String author,
       @JsonProperty("createdAt") LocalDateTime createdAt,
       @JsonProperty("likedBy") Set<String> likedBy) {
-    this(id, title, body, category, author, createdAt, likedBy);
-  }
-
-  private Post(UUID id, String title, String body, Category category, String author,
-               LocalDateTime createdAt, Set<String> likedBy) {
     this.id = id == null ? UUID.randomUUID() : id;
     this.title = requireNonBlank(title, "title");
     this.body = requireNonBlank(body, "body");
     this.category = Objects.requireNonNullElse(category, Category.ANNOUNCEMENTS);
-    String normalizedAuthor = (author == null || author.isBlank()) ? GUEST_AUTHOR_FALLBACK : author.trim();
-    this.author = normalizedAuthor;
+    this.author = normalizeAuthor(author);
     this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
-    if (likedBy != null) {
+    if (likedBy != null && !likedBy.isEmpty()) {
       this.likedBy.addAll(likedBy);
     }
   }
@@ -101,10 +90,8 @@ public class Post {
   }
 
   public boolean isLikedBy(String userId) {
-    if (userId == null || userId.isBlank()) {
-      return false;
-    }
-    return likedBy.contains(userId);
+    String normalized = normalizeUserId(userId);
+    return !normalized.isEmpty() && likedBy.contains(normalized);
   }
 
   /**
@@ -113,14 +100,15 @@ public class Post {
    * @return true if the post is liked after the toggle; false if unliked
    */
   public boolean toggleLike(String userId) {
-    if (userId == null || userId.isBlank()) {
+    String normalized = normalizeUserId(userId);
+    if (normalized.isEmpty()) {
       return false;
     }
-    if (likedBy.contains(userId)) {
-      likedBy.remove(userId);
+    if (likedBy.contains(normalized)) {
+      likedBy.remove(normalized);
       return false;
     }
-    likedBy.add(userId);
+    likedBy.add(normalized);
     return true;
   }
 
@@ -163,6 +151,17 @@ public class Post {
 
   public int getLikes() {
     return likeCount();
+  }
+
+  private String normalizeAuthor(String author) {
+    if (author == null || author.isBlank()) {
+      return GUEST_AUTHOR_FALLBACK;
+    }
+    return author.trim();
+  }
+
+  private String normalizeUserId(String userId) {
+    return userId == null ? "" : userId.trim();
   }
 
   private String requireNonBlank(String value, String fieldName) {

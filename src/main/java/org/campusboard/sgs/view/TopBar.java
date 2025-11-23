@@ -5,6 +5,7 @@ import org.campusboard.sgs.model.Role;
 import org.campusboard.sgs.util.*;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 
 public class TopBar extends JPanel {
   private final PostController posts;
@@ -19,6 +20,8 @@ public class TopBar extends JPanel {
   private JButton logoutButton;
   private JPanel authPanel;
   private final ImageIcon adminBadgeIcon = IconLoader.loadOrPlaceholder("admin", "moderate", 16, FAU_RED);
+  private final ImageIcon loginIcon = IconLoader.loadAction("login", 20);
+  private final ImageIcon logoutIcon = IconLoader.loadAction("logout", 20);
 
   private static final Color FAU_NAVY = new Color(0, 51, 102);
   private static final Color FAU_RED = new Color(206, 17, 65);
@@ -52,38 +55,9 @@ public class TopBar extends JPanel {
     JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     panel.setOpaque(false);
 
-    // Create circular logo badge
-    JPanel logoBadge = new JPanel() {
-      @Override
-      protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g.create();
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        // Draw circle
-        g2d.setColor(FAU_NAVY);
-        g2d.fillOval(0, 0, 40, 40);
-
-        // Draw text
-        g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Arial", Font.BOLD, 18));
-        FontMetrics fm = g2d.getFontMetrics();
-        String text = "CB";
-        int textWidth = fm.stringWidth(text);
-        int textHeight = fm.getAscent();
-        int x = (40 - textWidth) / 2;
-        int y = (40 - textHeight) / 2 + textHeight;
-        g2d.drawString(text, x, y);
-
-        g2d.dispose();
-      }
-
-      @Override
-      public Dimension getPreferredSize() {
-        return new Dimension(40, 40);
-      }
-    };
-    logoBadge.setOpaque(false);
+    ImageIcon logoIcon = IconLoader.loadUI("CB_Icon", 32);
+    JLabel logoBadge = new JLabel(logoIcon != null ? logoIcon : new ImageIcon());
+    logoBadge.setPreferredSize(new Dimension(40, 40));
     logoBadge.setToolTipText("CampusBoard - Social Hub for College Campuses");
 
     panel.add(logoBadge);
@@ -151,7 +125,10 @@ public class TopBar extends JPanel {
     authPanel.setOpaque(false);
 
     // Login button
-    loginButton = new JButton("Login");
+    loginButton = new JButton(loginIcon != null ? "" : "Login");
+    loginButton.setToolTipText("Login");
+    loginButton.setIcon(loginIcon);
+    loginButton.setPreferredSize(new Dimension(40, 32));
     loginButton.setFont(new Font("Arial", Font.BOLD, 13));
     loginButton.setForeground(Color.WHITE);
     loginButton.setBackground(FAU_RED);
@@ -170,13 +147,16 @@ public class TopBar extends JPanel {
     roleBadgeLabel.setForeground(FAU_NAVY);
 
     // Logout button
-    logoutButton = new JButton("Logout");
+    logoutButton = new JButton(logoutIcon != null ? "" : "Logout");
+    logoutButton.setToolTipText("Logout");
+    logoutButton.setIcon(logoutIcon);
+    logoutButton.setPreferredSize(new Dimension(40, 32));
     logoutButton.setFont(new Font("Arial", Font.PLAIN, 12));
-    logoutButton.setForeground(FAU_RED);
-    logoutButton.setBackground(TOPBAR_BG);
+    logoutButton.setForeground(Color.WHITE);
+    logoutButton.setBackground(FAU_NAVY);
     logoutButton.setBorderPainted(true);
     logoutButton.setBorder(BorderFactory.createCompoundBorder(
-        BorderFactory.createLineBorder(FAU_RED, 1),
+        BorderFactory.createLineBorder(FAU_NAVY, 1),
         BorderFactory.createEmptyBorder(5, 15, 5, 15)));
     logoutButton.setFocusPainted(false);
     logoutButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -262,12 +242,13 @@ public class TopBar extends JPanel {
   }
 
   private void handleLogout() {
-    int confirm = JOptionPane.showConfirmDialog(this,
+    int choice = JOptionPane.showConfirmDialog(this,
         "Are you sure you want to logout?",
         "Confirm Logout",
-        JOptionPane.YES_NO_OPTION);
+        JOptionPane.YES_NO_OPTION,
+        JOptionPane.QUESTION_MESSAGE);
 
-    if (confirm == JOptionPane.YES_OPTION) {
+    if (choice == JOptionPane.YES_OPTION) {
       auth.logout();
       JOptionPane.showMessageDialog(this,
           "Logged out successfully",

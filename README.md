@@ -114,12 +114,12 @@ open build/reports/jacoco/test/html/index.html
 ### Demo Login Credentials
 The in-memory seed data provides the following accounts for local testing:
 
-| Username | Password  | Role   |
-|----------|-----------|--------|
-| `admin`  | `admin123`  | Staff/Admin controls |
-| `staff`  | `staff123`  | Staff |
+| Username | Password  | Role      |
+|----------|-----------|-----------|
+| `admin`  | `admin123`  | Admin   |
+| `staff`  | `staff123`  | Staff   |
 | `student`| `student123`| Student |
-| `guest`  | `guest123`  | Guest |
+| `guest`  | `guest123`  | Guest   |
 
 > When remote mode is enabled, ensure the remote service is seeded with matching credentials or update this table accordingly.
 

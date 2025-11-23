@@ -10,6 +10,7 @@ import java.awt.*;
 
 public class MainWindow extends JFrame {
   private final PostController postController;
+  private final CommentController commentController;
   private final AuthController authController;
   private final UserRepository userRepo;
   private final Session session;
@@ -20,12 +21,14 @@ public class MainWindow extends JFrame {
   private JMenuItem redoItem;
 
   public MainWindow(PostController postController,
+      CommentController commentController,
       AuthController authController,
       UserRepository userRepo,
       Session session,
       EventBus bus) {
     super("CampusBoard");
     this.postController = postController;
+    this.commentController = commentController;
     this.authController = authController;
     this.userRepo = userRepo;
     this.session = session;
@@ -107,7 +110,7 @@ public class MainWindow extends JFrame {
     setLayout(new BorderLayout());
 
     var top = new TopBar(postController, authController, bus, session);
-    var feed = new FeedPanel(postController, session, bus);
+    var feed = new FeedPanel(postController, commentController, session, bus);
     var sidebar = new SidebarPanel(postController, bus, session, userRepo);
 
     var split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sidebar, feed);

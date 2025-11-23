@@ -14,6 +14,7 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import org.campusboard.sgs.controller.PostController;
 import org.campusboard.sgs.filter.SortByNew;
+import org.campusboard.sgs.controller.CommentController;
 import org.campusboard.sgs.model.Post;
 import org.campusboard.sgs.util.EventBus;
 import org.campusboard.sgs.util.Events;
@@ -22,6 +23,7 @@ import org.campusboard.sgs.util.Session;
 /** Scrollable feed that avoids full rebuilds to stop jumping to top. */
 public class FeedPanel extends JPanel {
   private final PostController controller;
+  private final CommentController commentController;
   private final Session session;
   private final EventBus bus;
   private final JScrollPane scroll;
@@ -29,13 +31,16 @@ public class FeedPanel extends JPanel {
   private final Map<UUID, PostCard> cards = new LinkedHashMap<>();
   private final javax.swing.Timer debounce = new javax.swing.Timer(120, e -> doRefresh()); // EDT-safe debounce
 
-  public FeedPanel(PostController controller, Session session, EventBus bus) {
+  public FeedPanel(PostController controller, org.campusboard.sgs.controller.CommentController commentController, Session session, EventBus bus) {
     super(new BorderLayout());
     this.controller = controller;
+    this.commentController = commentController;
     this.session = session;
     this.bus = bus;
     content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
     this.scroll = new JScrollPane(content);
+    this.scroll.getVerticalScrollBar().setUnitIncrement(24); // faster scroll
+    this.scroll.getHorizontalScrollBar().setUnitIncrement(24);
     add(scroll, BorderLayout.CENTER);
 
     debounce.setRepeats(false); // classic debounce
@@ -98,7 +103,7 @@ public class FeedPanel extends JPanel {
     // Rebuild order + bind
     content.removeAll();
     for (Post p : now) {
-      PostCard card = cards.computeIfAbsent(p.id(), id -> new PostCard(controller, session));
+      PostCard card = cards.computeIfAbsent(p.id(), id -> new PostCard(controller, commentController, session));
       card.bind(p);
       content.add(card);
       content.add(Box.createVerticalStrut(8));

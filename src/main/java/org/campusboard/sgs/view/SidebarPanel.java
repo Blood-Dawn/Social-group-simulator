@@ -155,7 +155,18 @@ public class SidebarPanel extends JPanel {
   }
 
   private ImageIcon loadCategoryIcon(String name) {
-    return IconLoader.loadOrPlaceholder("categories", name, FILTER_ICON_SIZE, FAU_NAVY);
+    return switch (name) {
+      case "all" -> IconLoader.load("categories", "all", FILTER_ICON_SIZE);
+      case "announcements" -> IconLoader.load("categories", "announcements", FILTER_ICON_SIZE);
+      case "study-groups" -> IconLoader.load("categories", "study-groups", FILTER_ICON_SIZE);
+      case "events" -> IconLoader.load("categories", "events", FILTER_ICON_SIZE);
+      case "lost-found" -> IconLoader.load("categories", "lost-found", FILTER_ICON_SIZE);
+      case "sort-new" -> IconLoader.load("ui", "clock", FILTER_ICON_SIZE); // closest available asset
+      case "trending" -> IconLoader.load("categories", "trending", FILTER_ICON_SIZE);
+      case "student", "staff" -> IconLoader.load("ui", "user", FILTER_ICON_SIZE);
+      case "admin" -> IconLoader.load("admin", "supervisor-account", FILTER_ICON_SIZE);
+      default -> IconLoader.load("categories", name, FILTER_ICON_SIZE);
+    };
   }
 
   private JPanel createUserPanel() {
@@ -170,6 +181,8 @@ public class SidebarPanel extends JPanel {
     userLabel.setFont(new Font("Arial", Font.PLAIN, 12));
     userLabel.setForeground(Color.GRAY);
     userLabel.setVerticalAlignment(SwingConstants.TOP);
+    userLabel.setHorizontalAlignment(SwingConstants.LEFT);
+    userLabel.setPreferredSize(new Dimension(220, 60));
     userLabel.setMaximumSize(new Dimension(220, Integer.MAX_VALUE));
 
     panel.add(userLabel, BorderLayout.CENTER);
@@ -194,8 +207,8 @@ public class SidebarPanel extends JPanel {
           userLabel.setToolTipText(null);
         }
       } else {
-        userLabel.setText("<html><b>Guest mode</b><br>" +
-            "Login to access<br>full features</html>");
+        userLabel.setText("<html><div style='width:200px'><b>Guest mode</b><br>" +
+            "Login to access full features</div></html>");
         userLabel.setIcon(null);
         userLabel.setToolTipText(null);
       }

@@ -7,7 +7,8 @@ public enum Events {
   FILTER_CHANGED,
   USER_LOGGED_IN,
   USER_LOGGED_OUT,
-  SHOW_LOGIN;
+  SHOW_LOGIN,
+  COMMENTS_CHANGED; // payload = postId
 
   public Payload of(Object data) {
     return new Payload(this, data);

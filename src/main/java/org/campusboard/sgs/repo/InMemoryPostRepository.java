@@ -9,15 +9,6 @@ public class InMemoryPostRepository implements PostRepository {
   private final Map<UUID, Post> map = new ConcurrentHashMap<>();
 
   public InMemoryPostRepository() {
-    seed();
-  }
-
-  private void seed() {
-    save(new Post(null, "Welcome to Campus Board!", "Be kind. Report issues via admin menu.", Category.ANNOUNCEMENTS,
-        "admin"));
-    save(new Post(null, "Study Group for COP3330", "Meet Fri 18:00, library 2F.", Category.STUDY_GROUPS, "stud01"));
-    save(new Post(null, "Lost Backpack", "Blue Jansport near CS building.", Category.LOST_FOUND, "stud01"));
-    save(new Post(null, "Basketball Game Tonight!", "Gym at 20:00; bring ID.", Category.EVENTS, "staff01"));
   }
 
   @Override

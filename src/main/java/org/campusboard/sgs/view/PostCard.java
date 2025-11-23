@@ -9,10 +9,12 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.KeyEvent;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -22,14 +24,18 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import org.campusboard.sgs.controller.PostController;
+import org.campusboard.sgs.controller.CommentController;
 import org.campusboard.sgs.model.Post;
+import org.campusboard.sgs.util.IconLoader;
 import org.campusboard.sgs.util.Session;
+import org.campusboard.sgs.view.dialogs.PostDetailDialog;
 
 /**
  * Individual post card that can be re-bound without recreating to avoid feed jumps.
  */
 public class PostCard extends JPanel {
   private final PostController controller;
+  private final CommentController commentController;
   private final Session session;
 
   private Post post;
@@ -39,8 +45,10 @@ public class PostCard extends JPanel {
   private final JLabel categoryBadge = new JLabel();
   private final JTextArea bodyArea = new JTextArea();
   private final JButton likeButton = new JButton();
+  private final JButton openButton = new JButton("Open");
   private final JButton deleteButton = new JButton("Delete");
   private final JLabel avatarLabel = createAvatarLabel();
+  private final ImageIcon deleteIcon = IconLoader.loadAction("delete", 16);
 
   private static final Color CARD_BACKGROUND = Color.WHITE;
   private static final Color HOVER_COLOR = new Color(248, 249, 250);
@@ -49,8 +57,9 @@ public class PostCard extends JPanel {
   private static final Color FAU_NAVY = new Color(0, 51, 102);
   private static final Color FAU_RED = new Color(206, 17, 65);
 
-  public PostCard(PostController controller, Session session) {
+  public PostCard(PostController controller, CommentController commentController, Session session) {
     this.controller = controller;
+    this.commentController = commentController;
     this.session = session;
     initialize();
   }
@@ -117,10 +126,15 @@ public class PostCard extends JPanel {
         BorderFactory.createEmptyBorder(4, 10, 4, 10)));
     right.add(categoryBadge);
 
+    deleteButton.setIcon(deleteIcon);
+    deleteButton.setText(deleteIcon == null ? "Delete" : "");
+    deleteButton.setToolTipText("Delete post");
     deleteButton.setFont(new Font("Arial", Font.PLAIN, 12));
     deleteButton.setForeground(FAU_RED);
     deleteButton.setBackground(CARD_BACKGROUND);
-    deleteButton.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
+    deleteButton.setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
+    deleteButton.setContentAreaFilled(false);
+    deleteButton.setFocusPainted(false);
     deleteButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     deleteButton.addActionListener(e -> handleDelete());
     right.add(Box.createHorizontalStrut(8));
@@ -136,11 +150,11 @@ public class PostCard extends JPanel {
     bodyPanel.setOpaque(false);
     bodyPanel.setLayout(new BoxLayout(bodyPanel, BoxLayout.Y_AXIS));
 
-    titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+    titleLabel.setFont(emojiCapable(new Font("Arial", Font.BOLD, 18)));
     titleLabel.setForeground(FAU_NAVY);
     titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-    bodyArea.setFont(new Font("Arial", Font.PLAIN, 14));
+    bodyArea.setFont(emojiCapable(new Font("Arial", Font.PLAIN, 14)));
     bodyArea.setForeground(TEXT_PRIMARY);
     bodyArea.setLineWrap(true);
     bodyArea.setWrapStyleWord(true);
@@ -168,6 +182,16 @@ public class PostCard extends JPanel {
     likeButton.addActionListener(e -> handleLike());
 
     footer.add(likeButton);
+    footer.add(Box.createHorizontalStrut(8));
+
+    openButton.setFont(new Font("Arial", Font.PLAIN, 12));
+    openButton.setForeground(FAU_NAVY);
+    openButton.setBackground(CARD_BACKGROUND);
+    openButton.setBorder(BorderFactory.createEmptyBorder(6, 10, 6, 10));
+    openButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    openButton.setToolTipText("Open post details");
+    openButton.addActionListener(e -> handleOpen());
+    footer.add(openButton);
     return footer;
   }
 
@@ -221,14 +245,22 @@ public class PostCard extends JPanel {
 
   private void updateLikeButton() {
     boolean liked = session.isAuthenticated() && post.isLikedBy(session.user().username());
-    String heart = liked ? "♥" : "♡";
+    String heart = liked ? "\u2665" : "\u2661";
     likeButton.setText(heart + " " + post.likeCount());
     likeButton.setForeground(liked ? FAU_NAVY : TEXT_SECONDARY);
+    likeButton.setToolTipText(liked ? "Unlike" : "Like");
   }
 
   private void handleLike() {
     controller.toggleLike(post);
     SwingUtilities.invokeLater(this::updateLikeButton);
+  }
+
+  private void handleOpen() {
+    var window = SwingUtilities.getWindowAncestor(this);
+    if (window instanceof javax.swing.JFrame frame) {
+      PostDetailDialog.showDialog(frame, post, commentController, session);
+    }
   }
 
   private void handleDelete() {
@@ -275,5 +307,18 @@ public class PostCard extends JPanel {
       }
     }
     return result.toString().trim();
+  }
+
+  private Font emojiCapable(Font base) {
+    String[] candidates = { "Segoe UI Emoji", base.getFamily() };
+    var available = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+    for (String name : candidates) {
+      for (String avail : available) {
+        if (avail.equalsIgnoreCase(name)) {
+          return new Font(avail, base.getStyle(), base.getSize());
+        }
+      }
+    }
+    return base;
   }
 }

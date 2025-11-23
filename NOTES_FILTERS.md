@@ -1,7 +1,7 @@
-CampusBoard filtering, sorting, and likes (current code understanding)
+CampusBoard filtering, sorting, and likes (current snapshot)
 
-- Filters use the `FilterStrategy` interface: UI components (e.g., `SidebarPanel`) set the active strategy on `PostController`, which then filters the in-memory posts before rendering in `FeedPanel`.
-- Sorting today is implicit: posts default to newest-first (createdAt desc). Additional sort strategies (e.g., trending by like count, “SortByNew”) can be plugged in alongside filters.
-- Search comes from `TopBar` and flows through `PostController.setSearch`, which publishes `SEARCH_CHANGED`; `FeedPanel` refreshes accordingly.
-- Likes are per-user: `Post.toggleLike(userId)` flips membership in a liked set, updates counts, and emits `POST_UPDATED` via `LikePostCommand`; `FeedPanel` reacts without wiping scroll position.
-- EventBus drives refreshes: `POSTS_REPLACED` for broad changes (create/delete), `POST_UPDATED` for targeted changes (like/edit), plus `FILTER_CHANGED`/`SEARCH_CHANGED` to rebuild filtered/sorted views.
+- Filters & sorting: `FilterStrategy` is the strategy interface; `PostController` holds `filterStrategy` (defaults to `AllFilter`) and `sortStrategy` (defaults to `SortByNew`). `SidebarPanel` sets these strategies (category, author type, trending, newest) and always routes through the controller rather than re-filtering in the view.
+- Search: `TopBar` pushes search text into `PostController.setSearch`, which publishes `SEARCH_CHANGED`; `FeedPanel` listens and rebuilds the view with the current search + filter + sort applied.
+- Feed refresh: `FeedPanel` subscribes to `POSTS_REPLACED` (create/delete) and `FILTER_CHANGED`/`SEARCH_CHANGED` to debounce full refreshes. For like/edit, `POST_UPDATED` triggers an in-place `PostCard` rebind when the sort order is stable (newest-first) to avoid scroll jumps.
+- Likes: `Post.toggleLike(userId)` maintains a per-user `likedBy` set (one like per user). `PostController.toggleLike` checks authentication, then runs `LikePostCommand`, which updates the repository and publishes `POST_UPDATED`. `PostCard` reflects liked state and count without recreating the whole feed.
+- Defaults from docs/code: Categories = ANNOUNCEMENTS, EVENTS, STUDY_GROUPS, LOST_FOUND; author types map from `Role`/`UserType`; newest-first sorting is the baseline, trending sorts by like count with createdAt as a tie-breaker. Guests can view and press Like, but the controller will prompt login before toggling.
