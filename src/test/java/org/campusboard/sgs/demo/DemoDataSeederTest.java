@@ -39,7 +39,31 @@ class DemoDataSeederTest {
     var comments = new InMemoryCommentRepository();
     DemoDataSeeder.ensureDemoComments(comments, posts, 84L);
 
-    boolean any = posts.findAll().stream().anyMatch(p -> !comments.findByPost(p.id()).isEmpty());
-    assertTrue(any, "Expected at least one seeded comment");
+    long withComments = posts.findAll().stream().filter(p -> !comments.findByPost(p.id()).isEmpty()).count();
+    assertTrue(withComments > 0, "Expected at least one seeded comment");
+    assertTrue(withComments <= posts.findAll().size(), "Should not exceed total posts");
+  }
+
+  @Test
+  void seederIsIdempotent() {
+    var posts = new InMemoryPostRepository();
+    var users = new InMemoryUserRepository();
+    DemoDataSeeder.ensureDemoData(posts, users, 99L);
+    int firstCount = posts.findAll().size();
+    DemoDataSeeder.ensureDemoData(posts, users, 99L);
+    assertEquals(firstCount, posts.findAll().size(), "Second seeding should not duplicate posts");
+  }
+
+  @Test
+  void adminPostsPrefixedTest() {
+    var posts = new InMemoryPostRepository();
+    var users = new InMemoryUserRepository();
+    DemoDataSeeder.ensureDemoData(posts, users, 11L);
+    assertTrue(posts.findAll().stream()
+        .filter(p -> "admin".equalsIgnoreCase(p.author()))
+        .allMatch(p -> p.title().startsWith("[TEST]")), "Admin posts should be [TEST] prefixed");
+    assertTrue(posts.findAll().stream()
+        .filter(p -> p.author() != null && p.author().toLowerCase().startsWith("staff"))
+        .noneMatch(p -> p.title().startsWith("[TEST]")), "Staff posts should not be [TEST] prefixed");
   }
 }

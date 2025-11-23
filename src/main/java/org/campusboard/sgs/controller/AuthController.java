@@ -17,7 +17,7 @@ public class AuthController {
 
   public boolean login(String user, String pass) {
     var u = users.find(user).orElse(null);
-    if (u != null && u.password().equals(pass)) {
+    if (u != null && users.validatePassword(user, pass)) {
       session.setUser(u);
       bus.publish(Events.USER_LOGGED_IN, u.username());
       return true;

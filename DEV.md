@@ -56,6 +56,25 @@ Recent hardening (high level)
 - UI polish: PostCard heart icons use explicit escapes + tooltips; sidebar guest label wraps; scroll speed increased; logout/delete dialogs support Y/N mnemonics; CB_Icon.png used in the header.
 - Icons: sidebar avoids placeholder squares; uses real assets where present.
 - Docs: NOTES_FILTERS.md documents current filter/sort/search/like flow; tests run via `./gradlew test`.
+- Comments & detail: Comment model/repo/controller added; PostDetailDialog shows full post + comments with add-comment flow; PostCard opens detail; demo seeding adds comments to ~45% posts.
+- Seeding rules: Admin demo posts are forced "[TEST]" and hidden from non-admin users; staff/student posts drop the prefix. Authors now use human-like handles (student/staff/admin/guest) and are seeded as users; comments seeded with variable counts. Seed randomized per run unless `-Dsgs.demo.seed` is set; restart resets data.
+- Validation: PostController create/edit now rejects blank title/body; event tests verify POST_UPDATED/POSTS_REPLACED; admin visibility enforced for admin-authored posts/comments.
+- Tests: Added coverage for seeder idempotence, admin/staff title rules, comment seeding, comment controller, and visibility rules; test suite remains green.
+- Filters & refresh: Sidebar filters now combine category + author type; active filters highlight with a blue border and toggle off on re-click; "All Posts" clears both. Author labels show role tags via UserRepository lookup. Added TopBar refresh button to rebuild feed without navigation.
+- Auth data: Demo users seeded for all demo authors (students/staff/admin/guest) so author-type filters work; InMemoryUserRepository hashes passwords and supports validate/assign.
+- Manage Users: Dialog now lists all users (baseline + seeded) and role toggles update the repository-backed list.
+
+Completed TODOs (details)
+- Demo data & comments: Added `DemoDataSeeder` (posts/comments seeding on empty repos, admin posts forced “[TEST]”, staff not; human-like authors; seeded comments on ~45% posts). Wired into `Main` startup with optional seed override (`-Dsgs.demo.seed`). Added Comment entity/repo/controller plus PostDetailDialog (full post + comments + add-comment) and PostCard “Open” action to launch it without full feed rebuild.
+- Data validation: PostController now guards create/edit with non-blank checks to prevent invalid posts (controller layer, ensures safer inputs).
+- Comments model/repo hardening: Added Comment entity with validation, in-memory repo, and controller as the sole access point for listing/adding comments.
+- Post detail UI: Introduced PostDetailDialog to show full post + comments and allow adding comments; wired from PostCard without forcing feed refresh.
+- Demo comments seeding: Seeder now attaches comments (1–5) to ~45% of posts, uses real post IDs, and enforces “[TEST]” on admin while keeping staff posts non-[TEST].
+- Tests: Added idempotence check for seeding, admin/staff title rules, comment repo/controller coverage, and validation/POST_UPDATED event checks to keep behaviors stable.
+- Icons: Verified real category/sort/author icons in `src/main/resources/icons/**`; sidebar no longer uses placeholders or colored boxes.
+- UI smoke: Performed manual run to exercise login, filters/sort, like/unlike, and guest visibility; feed kept scroll position under interactions.
+- Password handling: InMemoryUserRepository now hashes passwords (SHA-256) and exposes validate/assign; AuthController delegates validation to repo.
+- Broader tests: Added PostController event tests for POST_UPDATED/POSTS_REPLACED and blank input validation; overall test suite remains passing.
 
 Where to change things quickly
 - Adjust seeds: `Main.seedUsers` / `Main.seedPosts`.

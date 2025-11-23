@@ -18,10 +18,12 @@ public class TopBar extends JPanel {
   private JLabel usernameLabel;
   private JLabel roleBadgeLabel;
   private JButton logoutButton;
+  private JButton refreshButton;
   private JPanel authPanel;
   private final ImageIcon adminBadgeIcon = IconLoader.loadOrPlaceholder("admin", "moderate", 16, FAU_RED);
   private final ImageIcon loginIcon = IconLoader.loadAction("login", 20);
   private final ImageIcon logoutIcon = IconLoader.loadAction("logout", 20);
+  private final ImageIcon refreshIcon = IconLoader.loadAction("refresh", 20);
 
   private static final Color FAU_NAVY = new Color(0, 51, 102);
   private static final Color FAU_RED = new Color(206, 17, 65);
@@ -62,6 +64,17 @@ public class TopBar extends JPanel {
 
     panel.add(logoBadge);
     panel.add(Box.createHorizontalStrut(10));
+
+    refreshButton = new JButton(refreshIcon != null ? refreshIcon : new ImageIcon());
+    refreshButton.setToolTipText("Refresh feed");
+    refreshButton.setPreferredSize(new Dimension(32, 32));
+    refreshButton.setFocusPainted(false);
+    refreshButton.setBorderPainted(false);
+    refreshButton.setContentAreaFilled(false);
+    refreshButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    refreshButton.addActionListener(e -> bus.publish(Events.POSTS_REPLACED));
+    panel.add(refreshButton);
+    panel.add(Box.createHorizontalStrut(8));
 
     // Add app title
     JLabel titleLabel = new JLabel("CampusBoard");

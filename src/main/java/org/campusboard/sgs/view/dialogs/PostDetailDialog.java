@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingConstants;
 import org.campusboard.sgs.controller.CommentController;
 import org.campusboard.sgs.model.Comment;
 import org.campusboard.sgs.model.Post;
@@ -60,8 +61,9 @@ public final class PostDetailDialog extends JDialog {
     panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
     panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
 
-    JLabel title = new JLabel(post.title());
+    JLabel title = new JLabel(post.title(), SwingConstants.CENTER);
     title.setFont(new Font("Arial", Font.BOLD, 18));
+    title.setAlignmentX(CENTER_ALIGNMENT);
     JLabel meta = new JLabel("@" + post.author() + " • " + formatTimestamp(post.createdAt()) + " • " + post.category());
     meta.setFont(new Font("Arial", Font.PLAIN, 12));
 
@@ -78,8 +80,13 @@ public final class PostDetailDialog extends JDialog {
     JPanel container = new JPanel();
     container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 
-    JLabel body = new JLabel("<html>" + post.body().replace("\n", "<br>") + "</html>");
+    JTextArea body = new JTextArea(post.body());
+    body.setWrapStyleWord(true);
+    body.setLineWrap(true);
+    body.setEditable(false);
     body.setFont(new Font("Arial", Font.PLAIN, 14));
+    body.setOpaque(false);
+    body.setBorder(BorderFactory.createEmptyBorder(4, 10, 4, 10));
     body.setAlignmentX(LEFT_ALIGNMENT);
     container.add(body);
     container.add(Box.createVerticalStrut(12));

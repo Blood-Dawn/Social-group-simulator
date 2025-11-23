@@ -15,6 +15,8 @@ public class SidebarPanel extends JPanel {
   private final UserRepository userRepo;
   private JLabel userLabel;
   private final ImageIcon adminRoleIcon = IconLoader.loadOrPlaceholder("admin", "moderate", 16, FAU_NAVY);
+  private JButton selectedCategoryButton;
+  private JButton selectedAuthorButton;
 
   private static final Color FAU_NAVY = new Color(0, 51, 102);
   private static final Color SIDEBAR_BG = new Color(245, 245, 245);
@@ -58,7 +60,20 @@ public class SidebarPanel extends JPanel {
     panel.add(Box.createVerticalStrut(10));
 
     // All Posts
-    panel.add(createFilterButton("All Posts", new AllFilter(), loadCategoryIcon("all")));
+    JButton all = createFilterButton("All Posts", new AllFilter(), loadCategoryIcon("all"));
+    for (var l : all.getActionListeners()) {
+      all.removeActionListener(l);
+    }
+    all.addActionListener(e -> {
+      controller.setCategoryFilter(new AllFilter());
+      controller.setAuthorFilter(new AllFilter());
+      controller.setSort(new SortByNew());
+      clearSelectionStates();
+      markActive(all, true);
+      selectedCategoryButton = null;
+      selectedAuthorButton = null;
+    });
+    panel.add(all);
     panel.add(Box.createVerticalStrut(5));
 
     // Category filters
@@ -88,13 +103,13 @@ public class SidebarPanel extends JPanel {
     panel.add(Box.createVerticalStrut(10));
     panel.add(sectionLabel("Author Type"));
     panel.add(Box.createVerticalStrut(5));
-    panel.add(createFilterButton("Students", new AuthorTypeFilter(UserType.STUDENT, userRepo),
+    panel.add(createAuthorButton("Students", new AuthorTypeFilter(UserType.STUDENT, userRepo),
         loadCategoryIcon("student")));
     panel.add(Box.createVerticalStrut(5));
-    panel.add(createFilterButton("Staff", new AuthorTypeFilter(UserType.STAFF, userRepo),
+    panel.add(createAuthorButton("Staff", new AuthorTypeFilter(UserType.STAFF, userRepo),
         loadCategoryIcon("staff")));
     panel.add(Box.createVerticalStrut(5));
-    panel.add(createFilterButton("Admins", new AuthorTypeFilter(UserType.ADMIN, userRepo),
+    panel.add(createAuthorButton("Admins", new AuthorTypeFilter(UserType.ADMIN, userRepo),
         loadCategoryIcon("admin")));
 
     return panel;
@@ -129,8 +144,16 @@ public class SidebarPanel extends JPanel {
     });
 
     button.addActionListener(e -> {
-      controller.setFilter(filter);
-      controller.setSort(new SortByNew()); // reset to default newest when filter changes
+      if (selectedCategoryButton == button) {
+        controller.setCategoryFilter(new AllFilter());
+        clearCategorySelection();
+      } else {
+        controller.setCategoryFilter(filter);
+        controller.setSort(new SortByNew()); // reset to default newest when filter changes
+        clearCategorySelection();
+        selectedCategoryButton = button;
+        markActive(button, true);
+      }
     });
 
     return button;
@@ -167,6 +190,65 @@ public class SidebarPanel extends JPanel {
       case "admin" -> IconLoader.load("admin", "supervisor-account", FILTER_ICON_SIZE);
       default -> IconLoader.load("categories", name, FILTER_ICON_SIZE);
     };
+  }
+
+  private JButton createAuthorButton(String text, FilterStrategy filter, ImageIcon icon) {
+    JButton button = createFilterButton(text, new AllFilter(), icon);
+    for (var l : button.getActionListeners()) {
+      button.removeActionListener(l);
+    }
+    button.addActionListener(e -> {
+      if (selectedAuthorButton == button) {
+        controller.setAuthorFilter(new AllFilter());
+        clearAuthorSelection();
+      } else {
+        controller.setAuthorFilter(filter);
+        clearAuthorSelection();
+        selectedAuthorButton = button;
+        markActive(button, true);
+      }
+    });
+    return button;
+  }
+
+  private void clearSelectionStates() {
+    clearCategorySelection();
+    clearAuthorSelection();
+  }
+
+  private void clearCategorySelection() {
+    if (selectedCategoryButton != null) {
+      markActive(selectedCategoryButton, false);
+      selectedCategoryButton = null;
+    }
+  }
+
+  private void clearAuthorSelection() {
+    if (selectedAuthorButton != null) {
+      markActive(selectedAuthorButton, false);
+      selectedAuthorButton = null;
+    }
+  }
+
+  private boolean isActive(JButton button) {
+    return button.getBorder() instanceof javax.swing.border.LineBorder &&
+        ((javax.swing.border.LineBorder) button.getBorder()).getLineColor().equals(FAU_NAVY);
+  }
+
+  private void markActive(JButton button, boolean active) {
+    if (active) {
+      button.setBackground(BUTTON_BG);
+      button.setForeground(FAU_NAVY.darker());
+      button.setBorder(BorderFactory.createCompoundBorder(
+          BorderFactory.createLineBorder(FAU_NAVY, 2),
+          BorderFactory.createEmptyBorder(5, 10, 5, 10)));
+    } else {
+      button.setBackground(BUTTON_BG);
+      button.setForeground(FAU_NAVY);
+      button.setBorder(BorderFactory.createCompoundBorder(
+          BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+          BorderFactory.createEmptyBorder(5, 10, 5, 10)));
+    }
   }
 
   private JPanel createUserPanel() {

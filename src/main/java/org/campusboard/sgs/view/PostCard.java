@@ -1,5 +1,6 @@
 package org.campusboard.sgs.view;
 
+import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -13,8 +14,10 @@ import java.awt.event.KeyEvent;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.awt.image.BufferedImage;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -29,6 +32,7 @@ import org.campusboard.sgs.model.Post;
 import org.campusboard.sgs.util.IconLoader;
 import org.campusboard.sgs.util.Session;
 import org.campusboard.sgs.view.dialogs.PostDetailDialog;
+import org.campusboard.sgs.repo.UserRepository;
 
 /**
  * Individual post card that can be re-bound without recreating to avoid feed jumps.
@@ -36,6 +40,7 @@ import org.campusboard.sgs.view.dialogs.PostDetailDialog;
 public class PostCard extends JPanel {
   private final PostController controller;
   private final CommentController commentController;
+  private final UserRepository userRepo;
   private final Session session;
 
   private Post post;
@@ -49,6 +54,10 @@ public class PostCard extends JPanel {
   private final JButton deleteButton = new JButton("Delete");
   private final JLabel avatarLabel = createAvatarLabel();
   private final ImageIcon deleteIcon = IconLoader.loadAction("delete", 16);
+  private final ImageIcon likeOutlineIcon = IconLoader.loadAction("like-outline", 16);
+  private final ImageIcon likeFilledIcon = IconLoader.loadAction("like-filled", 16);
+  private final ImageIcon likeOutlineGrayIcon;
+  private final ImageIcon likeFilledRedIcon;
 
   private static final Color CARD_BACKGROUND = Color.WHITE;
   private static final Color HOVER_COLOR = new Color(248, 249, 250);
@@ -57,10 +66,13 @@ public class PostCard extends JPanel {
   private static final Color FAU_NAVY = new Color(0, 51, 102);
   private static final Color FAU_RED = new Color(206, 17, 65);
 
-  public PostCard(PostController controller, CommentController commentController, Session session) {
+  public PostCard(PostController controller, CommentController commentController, Session session, UserRepository userRepo) {
     this.controller = controller;
     this.commentController = commentController;
+    this.userRepo = userRepo;
     this.session = session;
+    this.likeOutlineGrayIcon = tintIcon(likeOutlineIcon, TEXT_SECONDARY);
+    this.likeFilledRedIcon = tintIcon(likeFilledIcon, FAU_RED);
     initialize();
   }
 
@@ -179,6 +191,8 @@ public class PostCard extends JPanel {
     likeButton.setBackground(CARD_BACKGROUND);
     likeButton.setBorder(BorderFactory.createEmptyBorder(6, 10, 6, 10));
     likeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    likeButton.setHorizontalTextPosition(SwingConstants.RIGHT);
+    likeButton.setIconTextGap(6);
     likeButton.addActionListener(e -> handleLike());
 
     footer.add(likeButton);
@@ -226,7 +240,8 @@ public class PostCard extends JPanel {
     titleLabel.setText(post.title());
     bodyArea.setText(post.body());
 
-    String authorText = "@" + (post.author() == null ? "guest" : post.author());
+    String authorRole = userRepo.find(post.author()).map(u -> " (" + u.role() + ")").orElse("");
+    String authorText = "@" + (post.author() == null ? "guest" : post.author()) + authorRole;
     authorLabel.setText(authorText);
     authorLabel.setToolTipText(authorText);
     avatarLabel.setText(extractInitial(post.author()));
@@ -245,9 +260,15 @@ public class PostCard extends JPanel {
 
   private void updateLikeButton() {
     boolean liked = session.isAuthenticated() && post.isLikedBy(session.user().username());
-    String heart = liked ? "\u2665" : "\u2661";
-    likeButton.setText(heart + " " + post.likeCount());
-    likeButton.setForeground(liked ? FAU_NAVY : TEXT_SECONDARY);
+    ImageIcon icon = liked ? likeFilledRedIcon : likeOutlineGrayIcon;
+    likeButton.setIcon(icon);
+    if (icon == null) {
+      String heart = liked ? "\u2665" : "\u2661";
+      likeButton.setText(heart + " " + post.likeCount());
+    } else {
+      likeButton.setText(String.valueOf(post.likeCount()));
+    }
+    likeButton.setForeground(liked ? FAU_RED : TEXT_SECONDARY);
     likeButton.setToolTipText(liked ? "Unlike" : "Like");
   }
 
@@ -307,6 +328,22 @@ public class PostCard extends JPanel {
       }
     }
     return result.toString().trim();
+  }
+
+  private ImageIcon tintIcon(ImageIcon source, Color color) {
+    if (source == null) {
+      return null;
+    }
+    int width = source.getIconWidth();
+    int height = source.getIconHeight();
+    BufferedImage tinted = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    Graphics2D g2 = tinted.createGraphics();
+    g2.drawImage(source.getImage(), 0, 0, null);
+    g2.setComposite(AlphaComposite.SrcAtop);
+    g2.setColor(color);
+    g2.fillRect(0, 0, width, height);
+    g2.dispose();
+    return new ImageIcon(tinted);
   }
 
   private Font emojiCapable(Font base) {

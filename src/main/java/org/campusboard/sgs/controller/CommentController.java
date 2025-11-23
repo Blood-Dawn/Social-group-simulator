@@ -1,6 +1,7 @@
 package org.campusboard.sgs.controller;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import org.campusboard.sgs.model.Comment;
@@ -21,7 +22,9 @@ public class CommentController {
   }
 
   public List<Comment> listForPost(UUID postId) {
-    return comments.findByPost(postId);
+    return comments.findByPost(postId).stream()
+        .sorted(Comparator.comparing(Comment::createdAt).reversed())
+        .toList();
   }
 
   public boolean addComment(UUID postId, String body) {

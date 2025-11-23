@@ -65,11 +65,9 @@ public class ManageUsersDialog extends JDialog {
 
   private void loadUsers() {
     tableModel.setRowCount(0);
-    // In a real app, we'd fetch all users. For now, we'll show a placeholder
-    tableModel.addRow(new Object[] { "guest", "GUEST", "Toggle Role" });
-    tableModel.addRow(new Object[] { "student", "STUDENT", "Toggle Role" });
-    tableModel.addRow(new Object[] { "staff", "STAFF", "Toggle Role" });
-    tableModel.addRow(new Object[] { "admin", "ADMIN", "Toggle Role" });
+    userRepo.listAll().stream()
+        .sorted(java.util.Comparator.comparing(User::username))
+        .forEach(u -> tableModel.addRow(new Object[] { u.username(), u.role().name(), "Toggle Role" }));
   }
 
   class ButtonRenderer extends JButton implements TableCellRenderer {

@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import org.campusboard.sgs.model.Comment;
 import org.campusboard.sgs.model.Category;
 import org.campusboard.sgs.model.Post;
+import org.campusboard.sgs.model.Role;
+import org.campusboard.sgs.model.User;
 import org.campusboard.sgs.repo.CommentRepository;
 import org.campusboard.sgs.repo.PostRepository;
 import org.campusboard.sgs.repo.UserRepository;
@@ -21,11 +23,12 @@ import org.campusboard.sgs.repo.UserRepository;
  * overwriting user data.
  */
 public final class DemoDataSeeder {
-  private static final List<String> AUTHORS = List.of(
-      "alex", "jordan", "maya", "riley", "sam", "taylor",
-      "ashley", "kevin", "lee",
-      "staff_miller", "staff_lee",
-      "admin", "club_media", "club_cs", "guest");
+  private static final List<String> STUDENT_AUTHORS = List.of(
+      "alex_student", "jordan_student", "maya_student", "riley_student", "sam_student",
+      "taylor_student", "ashley_student", "kevin_student", "lee_student");
+  private static final List<String> STAFF_AUTHORS = List.of("miller_staff", "lee_staff");
+  private static final List<String> ADMIN_AUTHORS = List.of("admin_admin");
+  private static final List<String> OTHER_AUTHORS = List.of("club_media_staff", "club_cs_staff", "guest_user");
   private static final List<String> LIKE_HANDLES = List.of(
       "stud01", "stud02", "stud03", "stud04", "stud05",
       "staff01", "staff02", "alumni01", "guest", "admin");
@@ -40,6 +43,7 @@ public final class DemoDataSeeder {
     if (posts.findAll().size() > 0) {
       return;
     }
+    seedUsers(users);
     Random rng = new Random(seed);
     List<Post> seedPosts = new ArrayList<>();
     seedPosts.addAll(announcementPosts(rng));
@@ -54,24 +58,6 @@ public final class DemoDataSeeder {
 
   public static void ensureDemoComments(CommentRepository comments, PostRepository posts) {
     ensureDemoComments(comments, posts, resolveSeed() ^ 0x9E3779B97F4A7C15L);
-  }
-
-  public static void ensureDemoComments(CommentRepository comments, PostRepository posts, long seed) {
-    List<Post> all = posts.findAll();
-    if (all.isEmpty() || hasAnyComments(comments, all)) {
-      return;
-    }
-    Random commentRng = new Random(seed);
-    int guaranteed = Math.min(12, all.size());
-    for (int i = 0; i < all.size(); i++) {
-      Post p = all.get(i);
-      int count = (i < guaranteed) ? 1 + commentRng.nextInt(2) : commentRng.nextInt(2); // at least 1 for first batch
-      for (int c = 0; c < count; c++) {
-        String author = pickAuthor(commentRng);
-        String body = sampleCommentBody(p.category(), c);
-        comments.add(new Comment(null, p.id(), author, body, LocalDateTime.now().minusMinutes(commentRng.nextInt(240))));
-      }
-    }
   }
 
   private static List<Post> announcementPosts(Random rng) {
@@ -251,8 +237,32 @@ public final class DemoDataSeeder {
     return results;
   }
 
+  public static void ensureDemoComments(CommentRepository comments, PostRepository posts, long seed) {
+    List<Post> all = posts.findAll();
+    if (all.isEmpty() || hasAnyComments(comments, all)) {
+      return;
+    }
+    Random commentRng = new Random(seed);
+    for (Post p : all) {
+      // 40-50% of posts get comments
+      if (commentRng.nextDouble() < 0.45) {
+        int count = 1 + commentRng.nextInt(5); // 1-5 comments
+        for (int c = 0; c < count; c++) {
+          String author = pickCommentAuthor(commentRng, p);
+          String body = sampleCommentBody(p.category(), c);
+          comments.add(new Comment(null, p.id(), author, body, LocalDateTime.now().minusMinutes(commentRng.nextInt(240))));
+        }
+      }
+    }
+  }
+
   private static String pickAuthor(Random rng) {
-    return AUTHORS.get(rng.nextInt(AUTHORS.size()));
+    List<String> pool = new ArrayList<>();
+    pool.addAll(STUDENT_AUTHORS);
+    pool.addAll(STAFF_AUTHORS);
+    pool.addAll(ADMIN_AUTHORS);
+    pool.addAll(OTHER_AUTHORS);
+    return pool.get(rng.nextInt(pool.size()));
   }
 
   private static Set<String> sampleLikes(int min, int max, Random rng) {
@@ -294,13 +304,28 @@ public final class DemoDataSeeder {
   }
 
   private static String applyAdminRule(String title, String author) {
-    if ("admin".equalsIgnoreCase(author) && !title.startsWith("[TEST]")) {
+    if ((author != null && author.toLowerCase().contains("admin")) && !title.startsWith("[TEST]")) {
       return "[TEST] " + title;
     }
-    if (author != null && author.toLowerCase().startsWith("staff") && title.startsWith("[TEST]")) {
+    boolean staff = author != null && author.toLowerCase().startsWith("staff");
+    boolean admin = author != null && author.toLowerCase().contains("admin");
+    if (!admin && title.startsWith("[TEST]")) {
       return title.replaceFirst("^\\[TEST\\]\\s*", "");
     }
     return title;
+  }
+
+  private static String pickCommentAuthor(Random rng, Post post) {
+    boolean adminPost = post.author() != null && post.author().toLowerCase().contains("admin");
+    List<String> pool = new ArrayList<>();
+    if (adminPost) {
+      pool.addAll(ADMIN_AUTHORS);
+    } else {
+      pool.addAll(STUDENT_AUTHORS);
+      pool.addAll(STAFF_AUTHORS);
+      pool.addAll(OTHER_AUTHORS.stream().filter(a -> !a.toLowerCase().contains("admin")).toList());
+    }
+    return pool.get(rng.nextInt(pool.size()));
   }
 
   public static long resolveSeed() {
@@ -312,5 +337,36 @@ public final class DemoDataSeeder {
       }
     }
     return new Random().nextLong();
+  }
+
+  private static void seedUsers(UserRepository users) {
+    // Keep baseline manual test accounts
+    users.add(new User("guest", "guest123", Role.GUEST));
+    users.add(new User("student", "student123", Role.STUDENT));
+    users.add(new User("staff", "staff123", Role.STAFF));
+    users.add(new User("admin", "admin123", Role.ADMIN));
+
+    for (String s : STUDENT_AUTHORS) {
+      users.add(new User(s, "pw", Role.STUDENT));
+    }
+    for (String s : STAFF_AUTHORS) {
+      users.add(new User(s, "pw", Role.STAFF));
+    }
+    for (String s : ADMIN_AUTHORS) {
+      users.add(new User(s, "pw", Role.ADMIN));
+    }
+    for (String s : OTHER_AUTHORS) {
+      Role role;
+      if (s.contains("guest")) {
+        role = Role.GUEST;
+      } else if (s.toLowerCase().contains("admin")) {
+        role = Role.ADMIN;
+      } else if (s.toLowerCase().contains("staff")) {
+        role = Role.STAFF;
+      } else {
+        role = Role.STAFF;
+      }
+      users.add(new User(s, "pw", role));
+    }
   }
 }

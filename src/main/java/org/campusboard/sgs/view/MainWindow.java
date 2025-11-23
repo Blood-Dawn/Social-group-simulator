@@ -101,6 +101,10 @@ public class MainWindow extends JFrame {
     JMenuItem aboutItem = new JMenuItem("About");
     aboutItem.addActionListener(e -> showAboutDialog());
     helpMenu.add(aboutItem);
+
+    JMenuItem rulesItem = new JMenuItem("Community Guidelines");
+    rulesItem.addActionListener(e -> showRulesDialog());
+    helpMenu.add(rulesItem);
     menuBar.add(helpMenu);
 
     setJMenuBar(menuBar);
@@ -110,7 +114,7 @@ public class MainWindow extends JFrame {
     setLayout(new BorderLayout());
 
     var top = new TopBar(postController, authController, bus, session);
-    var feed = new FeedPanel(postController, commentController, session, bus);
+    var feed = new FeedPanel(postController, commentController, session, bus, userRepo);
     var sidebar = new SidebarPanel(postController, bus, session, userRepo);
 
     var split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sidebar, feed);
@@ -148,6 +152,22 @@ public class MainWindow extends JFrame {
         "CampusBoard\nVersion 1.0\n\n" +
             "A social posting system for campus communities",
         "About CampusBoard",
+        JOptionPane.INFORMATION_MESSAGE);
+  }
+
+  private void showRulesDialog() {
+    JOptionPane.showMessageDialog(this,
+        """
+        Community guidelines for posting and commenting:
+        • Keep posts relevant to campus life and the selected category.
+        • No harassment, hate speech, or personal attacks.
+        • Do not share private or sensitive information.
+        • Use descriptive titles; mark tests or demos clearly.
+        • For lost & found, include contact and a brief description.
+        • Be respectful in comments; constructive feedback only.
+        • Admin posts are internal; only admins can view and respond.
+        """,
+        "Community Guidelines",
         JOptionPane.INFORMATION_MESSAGE);
   }
 }

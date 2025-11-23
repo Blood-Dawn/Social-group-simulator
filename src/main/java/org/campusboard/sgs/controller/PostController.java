@@ -14,7 +14,8 @@ public class PostController {
   private final EventBus bus;
   private final UndoManager undoManager;
   private FilterStrategy sortStrategy = new SortByNew();
-  private FilterStrategy filterStrategy = new AllFilter();
+  private final List<FilterStrategy> categoryFilters = new java.util.ArrayList<>();
+  private final List<FilterStrategy> authorFilters = new java.util.ArrayList<>();
   private String search = null;
 
   public PostController(PostRepository posts, UserRepository users, Session session, EventBus bus) {
@@ -27,22 +28,42 @@ public class PostController {
 
   public List<Post> current() {
     List<Post> base = posts.findAll();
+    if (session.role() != Role.ADMIN) {
+      base = base.stream().filter(p -> !isAdminPost(p)).collect(Collectors.toList());
+    }
     List<Post> afterSearch = applySearch(base);
 
-    List<Post> filtered = (filterStrategy == null ? afterSearch.stream() : filterStrategy.filter(afterSearch))
-        .collect(Collectors.toList());
+    List<Post> filtered = applyFilters(afterSearch, categoryFilters);
+    filtered = applyFilters(filtered, authorFilters);
 
     return (sortStrategy == null ? filtered.stream() : sortStrategy.filter(filtered))
         .collect(Collectors.toList());
   }
 
   public void setFilter(FilterStrategy strategy) {
-    this.filterStrategy = strategy == null ? new AllFilter() : strategy;
-    bus.publish(Events.FILTER_CHANGED, filterStrategy.getDescription());
+    setCategoryFilter(strategy);
+  }
+
+  public void setCategoryFilter(FilterStrategy strategy) {
+    if (strategy instanceof AllFilter || strategy == null) {
+      this.categoryFilters.clear();
+    } else {
+      this.categoryFilters.add(strategy);
+    }
+    bus.publish(Events.FILTER_CHANGED, "Category filters updated");
+  }
+
+  public void setAuthorFilter(FilterStrategy strategy) {
+    if (strategy instanceof AllFilter || strategy == null) {
+      this.authorFilters.clear();
+    } else {
+      this.authorFilters.add(strategy);
+    }
+    bus.publish(Events.FILTER_CHANGED, "Author filters updated");
   }
 
   public FilterStrategy getFilter() {
-    return filterStrategy;
+    return categoryFilters.isEmpty() ? new AllFilter() : categoryFilters.get(0);
   }
 
   public void setSort(FilterStrategy strategy) {
@@ -60,15 +81,19 @@ public class PostController {
   }
 
   public void create(String title, String body, Category cat) {
+    String safeTitle = requireNonBlank(title, "title");
+    String safeBody = requireNonBlank(body, "body");
     var author = session.isAuthenticated() ? session.user().username() : "guest";
-    var post = new Post(null, title, body, cat, author);
+    var post = new Post(null, safeTitle, safeBody, cat, author);
     undoManager.execute(new CreatePostCommand(posts, bus, post));
   }
 
   public void edit(Post post, String title, String body, Category cat) {
     if (!canModifyPost(post))
       return;
-    undoManager.execute(new EditPostCommand(posts, bus, post, title, body, cat));
+    String safeTitle = requireNonBlank(title, "title");
+    String safeBody = requireNonBlank(body, "body");
+    undoManager.execute(new EditPostCommand(posts, bus, post, safeTitle, safeBody, cat));
   }
 
   public void delete(Post post) {
@@ -141,5 +166,27 @@ public class PostController {
             p.body().toLowerCase().contains(searchLower) ||
             p.author().toLowerCase().contains(searchLower))
         .collect(Collectors.toList());
+  }
+
+  private String requireNonBlank(String value, String field) {
+    if (value == null || value.isBlank()) {
+      throw new IllegalArgumentException(field + " must not be blank");
+    }
+    return value;
+  }
+
+  private List<Post> applyFilters(List<Post> source, List<FilterStrategy> filters) {
+    if (filters.isEmpty()) {
+      return source;
+    }
+    return filters.stream()
+        .reduce(source.stream(), (stream, f) -> f.filter(stream.toList()), (a, b) -> b)
+        .toList();
+  }
+
+  private boolean isAdminPost(Post post) {
+    return users.find(post.author())
+        .map(u -> u.role() == Role.ADMIN)
+        .orElseGet(() -> post.author() != null && post.author().toLowerCase().contains("admin"));
   }
 }
