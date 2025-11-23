@@ -4,6 +4,7 @@ import org.campusboard.sgs.controller.PostController;
 import org.campusboard.sgs.filter.*;
 import org.campusboard.sgs.model.*;
 import org.campusboard.sgs.util.*;
+import org.campusboard.sgs.repo.UserRepository;
 import javax.swing.*;
 import java.awt.*;
 
@@ -11,6 +12,7 @@ public class SidebarPanel extends JPanel {
   private final PostController controller;
   private final EventBus bus;
   private final Session session;
+  private final UserRepository userRepo;
   private JLabel userLabel;
   private final ImageIcon adminRoleIcon = IconLoader.loadOrPlaceholder("admin", "moderate", 16, FAU_NAVY);
 
@@ -20,10 +22,11 @@ public class SidebarPanel extends JPanel {
   private static final Color BUTTON_HOVER = new Color(225, 239, 254);
   private static final int FILTER_ICON_SIZE = 20;
 
-  public SidebarPanel(PostController controller, EventBus bus, Session session) {
+  public SidebarPanel(PostController controller, EventBus bus, Session session, UserRepository userRepo) {
     this.controller = controller;
     this.bus = bus;
     this.session = session;
+    this.userRepo = userRepo;
 
     setLayout(new BorderLayout());
     setBackground(SIDEBAR_BG);
@@ -51,11 +54,7 @@ public class SidebarPanel extends JPanel {
     panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
     // Title
-    JLabel title = new JLabel("Filters");
-    title.setFont(new Font("Arial", Font.BOLD, 16));
-    title.setForeground(FAU_NAVY);
-    title.setAlignmentX(Component.LEFT_ALIGNMENT);
-    panel.add(title);
+    panel.add(sectionLabel("Filters"));
     panel.add(Box.createVerticalStrut(10));
 
     // All Posts
@@ -78,9 +77,25 @@ public class SidebarPanel extends JPanel {
 
     // Trending
     panel.add(Box.createVerticalStrut(10));
-    panel.add(createFilterButton("Trending", new TrendingFilter(),
+    panel.add(sectionLabel("Sort"));
+    panel.add(Box.createVerticalStrut(5));
+    panel.add(createSortButton("Newest", new SortByNew(), loadCategoryIcon("sort-new")));
+    panel.add(Box.createVerticalStrut(5));
+    panel.add(createSortButton("Trending", new TrendingFilter(),
         loadCategoryIcon("trending")));
     panel.add(Box.createVerticalStrut(5));
+
+    panel.add(Box.createVerticalStrut(10));
+    panel.add(sectionLabel("Author Type"));
+    panel.add(Box.createVerticalStrut(5));
+    panel.add(createFilterButton("Students", new AuthorTypeFilter(UserType.STUDENT, userRepo),
+        loadCategoryIcon("student")));
+    panel.add(Box.createVerticalStrut(5));
+    panel.add(createFilterButton("Staff", new AuthorTypeFilter(UserType.STAFF, userRepo),
+        loadCategoryIcon("staff")));
+    panel.add(Box.createVerticalStrut(5));
+    panel.add(createFilterButton("Admins", new AuthorTypeFilter(UserType.ADMIN, userRepo),
+        loadCategoryIcon("admin")));
 
     return panel;
   }
@@ -113,9 +128,30 @@ public class SidebarPanel extends JPanel {
       }
     });
 
-    button.addActionListener(e -> controller.setFilter(filter));
+    button.addActionListener(e -> {
+      controller.setFilter(filter);
+      controller.setSort(new SortByNew()); // reset to default newest when filter changes
+    });
 
     return button;
+  }
+
+  private JButton createSortButton(String text, FilterStrategy sortStrategy, ImageIcon icon) {
+    JButton button = createFilterButton(text, new AllFilter(), icon);
+    // Replace action to avoid resetting filter
+    for (var l : button.getActionListeners()) {
+      button.removeActionListener(l);
+    }
+    button.addActionListener(e -> controller.setSort(sortStrategy));
+    return button;
+  }
+
+  private JLabel sectionLabel(String title) {
+    JLabel label = new JLabel(title);
+    label.setFont(new Font("Arial", Font.BOLD, 16));
+    label.setForeground(FAU_NAVY);
+    label.setAlignmentX(Component.LEFT_ALIGNMENT);
+    return label;
   }
 
   private ImageIcon loadCategoryIcon(String name) {
@@ -134,6 +170,7 @@ public class SidebarPanel extends JPanel {
     userLabel.setFont(new Font("Arial", Font.PLAIN, 12));
     userLabel.setForeground(Color.GRAY);
     userLabel.setVerticalAlignment(SwingConstants.TOP);
+    userLabel.setMaximumSize(new Dimension(220, Integer.MAX_VALUE));
 
     panel.add(userLabel, BorderLayout.CENTER);
 

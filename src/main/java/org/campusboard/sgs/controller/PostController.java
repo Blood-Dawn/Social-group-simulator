@@ -13,6 +13,7 @@ public class PostController {
   private final Session session;
   private final EventBus bus;
   private final UndoManager undoManager;
+  private FilterStrategy sortStrategy = new SortByNew();
   private FilterStrategy filterStrategy = new AllFilter();
   private String search = null;
 
@@ -25,28 +26,32 @@ public class PostController {
   }
 
   public List<Post> current() {
-    List<Post> filtered = filterStrategy.filter(posts.findAll())
+    List<Post> base = posts.findAll();
+    List<Post> afterSearch = applySearch(base);
+
+    List<Post> filtered = (filterStrategy == null ? afterSearch.stream() : filterStrategy.filter(afterSearch))
         .collect(Collectors.toList());
 
-    if (search == null || search.isBlank()) {
-      return filtered;
-    }
-
-    String searchLower = search.toLowerCase();
-    return filtered.stream()
-        .filter(p -> p.title().toLowerCase().contains(searchLower) ||
-            p.body().toLowerCase().contains(searchLower) ||
-            p.author().toLowerCase().contains(searchLower))
+    return (sortStrategy == null ? filtered.stream() : sortStrategy.filter(filtered))
         .collect(Collectors.toList());
   }
 
   public void setFilter(FilterStrategy strategy) {
-    this.filterStrategy = strategy;
-    bus.publish(Events.FILTER_CHANGED, null);
+    this.filterStrategy = strategy == null ? new AllFilter() : strategy;
+    bus.publish(Events.FILTER_CHANGED, filterStrategy.getDescription());
   }
 
   public FilterStrategy getFilter() {
     return filterStrategy;
+  }
+
+  public void setSort(FilterStrategy strategy) {
+    this.sortStrategy = strategy == null ? new SortByNew() : strategy;
+    bus.publish(Events.FILTER_CHANGED, sortStrategy.getDescription());
+  }
+
+  public FilterStrategy getSort() {
+    return sortStrategy;
   }
 
   public void setSearch(String s) {
@@ -120,5 +125,21 @@ public class PostController {
 
   public UndoManager getUndoManager() {
     return undoManager;
+  }
+
+  public java.util.Optional<Post> findById(java.util.UUID id) {
+    return posts.findById(id);
+  }
+
+  private List<Post> applySearch(List<Post> source) {
+    if (search == null || search.isBlank()) {
+      return source;
+    }
+    String searchLower = search.toLowerCase();
+    return source.stream()
+        .filter(p -> p.title().toLowerCase().contains(searchLower) ||
+            p.body().toLowerCase().contains(searchLower) ||
+            p.author().toLowerCase().contains(searchLower))
+        .collect(Collectors.toList());
   }
 }

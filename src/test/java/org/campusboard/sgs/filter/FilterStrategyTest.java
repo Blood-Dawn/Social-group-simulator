@@ -1,6 +1,9 @@
 package org.campusboard.sgs.filter;
 
 import org.campusboard.sgs.model.*;
+import org.campusboard.sgs.repo.InMemoryUserRepository;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.util.*;
@@ -98,5 +101,38 @@ class FilterStrategyTest {
     TrendingFilter filter = new TrendingFilter();
 
     assertEquals("Trending", filter.getDescription());
+  }
+
+  @Test
+  void authorTypeFilter_filtersByUserType() {
+    var users = new InMemoryUserRepository();
+    users.add(new User("studX", "pw", Role.STUDENT));
+    users.add(new User("staffX", "pw", Role.STAFF));
+
+    List<Post> sample = List.of(
+        new Post(null, "Student Post", "Body", Category.EVENTS, "studX"),
+        new Post(null, "Staff Post", "Body", Category.ANNOUNCEMENTS, "staffX"));
+
+    FilterStrategy filter = new AuthorTypeFilter(UserType.STAFF, users);
+    List<Post> result = filter.filter(sample).toList();
+
+    assertEquals(1, result.size());
+    assertEquals("Staff Post", result.get(0).title());
+  }
+
+  @Test
+  void sortByNew_ordersNewestFirst() {
+    LocalDateTime now = LocalDateTime.now();
+    List<Post> sample = List.of(
+        new Post(UUID.randomUUID(), "Older", "Body", Category.EVENTS, "user1", now.minusDays(2), Set.of()),
+        new Post(UUID.randomUUID(), "Newest", "Body", Category.EVENTS, "user2", now, Set.of()),
+        new Post(UUID.randomUUID(), "Middle", "Body", Category.EVENTS, "user3", now.minusHours(5), Set.of()));
+
+    FilterStrategy sorter = new SortByNew();
+    List<Post> result = sorter.filter(sample).toList();
+
+    assertEquals("Newest", result.get(0).title());
+    assertEquals("Middle", result.get(1).title());
+    assertEquals("Older", result.get(2).title());
   }
 }

@@ -1,122 +1,147 @@
 package org.campusboard.sgs.view;
 
-import org.campusboard.sgs.controller.PostController;
-import org.campusboard.sgs.model.*;
-import org.campusboard.sgs.util.IconLoader;
-import org.campusboard.sgs.util.Session;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.time.Duration;
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
+import org.campusboard.sgs.controller.PostController;
+import org.campusboard.sgs.model.Post;
+import org.campusboard.sgs.util.Session;
 
+/**
+ * Individual post card that can be re-bound without recreating to avoid feed jumps.
+ */
 public class PostCard extends JPanel {
   private final PostController controller;
   private final Session session;
+
   private Post post;
+  private final JLabel titleLabel = new JLabel();
+  private final JLabel authorLabel = new JLabel();
+  private final JLabel timestampLabel = new JLabel();
+  private final JLabel categoryBadge = new JLabel();
+  private final JTextArea bodyArea = new JTextArea();
+  private final JButton likeButton = new JButton();
+  private final JButton deleteButton = new JButton("Delete");
+  private final JLabel avatarLabel = createAvatarLabel();
 
-  private JLabel titleLabel;
-  private JTextArea bodyArea;
-  private JLabel authorLabel;
-  private JLabel timestampLabel;
-  private JLabel categoryBadge;
-  private JButton likeButton;
-  private JButton deleteButton;
-
+  private static final Color CARD_BACKGROUND = Color.WHITE;
+  private static final Color HOVER_COLOR = new Color(248, 249, 250);
+  private static final Color TEXT_PRIMARY = new Color(33, 37, 41);
+  private static final Color TEXT_SECONDARY = new Color(108, 117, 125);
   private static final Color FAU_NAVY = new Color(0, 51, 102);
   private static final Color FAU_RED = new Color(206, 17, 65);
-  private static final Color CARD_BG = Color.WHITE;
-  private static final Color HOVER_BG = new Color(248, 249, 250);
-  private static final ImageIcon LIKE_ICON = IconLoader.loadOrPlaceholder("actions", "like-outline", 16, FAU_NAVY);
-  private static final ImageIcon LIKE_FILLED_ICON = IconLoader.loadOrPlaceholder("actions", "like-filled", 16, FAU_RED);
-  private static final ImageIcon DELETE_ICON = IconLoader.loadOrPlaceholder("actions", "delete", 16, FAU_RED);
 
   public PostCard(PostController controller, Session session) {
     this.controller = controller;
     this.session = session;
-    setLayout(new BorderLayout(10, 10));
-    setBackground(CARD_BG);
+    initialize();
+  }
+
+  private void initialize() {
+    setLayout(new BorderLayout(12, 10));
+    setBackground(CARD_BACKGROUND);
     setBorder(BorderFactory.createCompoundBorder(
-        BorderFactory.createLineBorder(new Color(220, 220, 220), 1),
-        BorderFactory.createEmptyBorder(15, 15, 15, 15)));
+        BorderFactory.createCompoundBorder(
+            BorderFactory.createEmptyBorder(2, 2, 6, 2),
+            BorderFactory.createLineBorder(new Color(0, 0, 0, 20), 1)),
+        BorderFactory.createEmptyBorder(16, 16, 16, 16)));
 
     addMouseListener(new java.awt.event.MouseAdapter() {
+      @Override
       public void mouseEntered(java.awt.event.MouseEvent e) {
-        setBackground(HOVER_BG);
+        setBackground(HOVER_COLOR);
       }
 
+      @Override
       public void mouseExited(java.awt.event.MouseEvent e) {
-        setBackground(CARD_BG);
+        setBackground(CARD_BACKGROUND);
       }
     });
 
     add(createHeader(), BorderLayout.NORTH);
-    add(createContent(), BorderLayout.CENTER);
+    add(createBody(), BorderLayout.CENTER);
     add(createFooter(), BorderLayout.SOUTH);
   }
 
-  public void bind(Post post) {
-    this.post = post;
-    titleLabel.setText(post.title());
-    bodyArea.setText(post.body());
-    authorLabel.setText("@" + post.author());
-    timestampLabel.setText(formatTime(post.createdAt()));
-    categoryBadge.setText(formatCategory(post.category()));
-    likeButton.setEnabled(session.isAuthenticated());
-    likeButton.setToolTipText(session.isAuthenticated()
-        ? "Toggle like"
-        : "Log in to like posts");
-    refreshLikeButton();
-
-    // Update delete button visibility based on centralized permission check
-    deleteButton.setVisible(controller.canModifyPost(post));
-  }
-
   private JPanel createHeader() {
-    JPanel header = new JPanel(new BorderLayout());
+    JPanel header = new JPanel();
     header.setOpaque(false);
+    header.setLayout(new BorderLayout(10, 0));
 
-    JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+    JPanel left = new JPanel();
     left.setOpaque(false);
+    left.setLayout(new BoxLayout(left, BoxLayout.X_AXIS));
 
-    authorLabel = new JLabel("@author");
-    authorLabel.setFont(new Font("Arial", Font.BOLD, 13));
-    authorLabel.setForeground(FAU_NAVY);
+    left.add(avatarLabel);
+    left.add(Box.createHorizontalStrut(10));
 
-    timestampLabel = new JLabel("Just now");
+    JPanel text = new JPanel();
+    text.setOpaque(false);
+    text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+    authorLabel.setFont(new Font("Arial", Font.BOLD, 14));
+    authorLabel.setForeground(TEXT_PRIMARY);
     timestampLabel.setFont(new Font("Arial", Font.PLAIN, 11));
-    timestampLabel.setForeground(Color.GRAY);
+    timestampLabel.setForeground(TEXT_SECONDARY);
+    text.add(authorLabel);
+    text.add(timestampLabel);
 
-    left.add(authorLabel);
-    left.add(Box.createHorizontalStrut(5));
-    left.add(timestampLabel);
+    left.add(text);
 
-    categoryBadge = new JLabel("Category");
-    categoryBadge.setFont(new Font("Arial", Font.BOLD, 10));
+    JPanel right = new JPanel();
+    right.setOpaque(false);
+    right.setLayout(new BoxLayout(right, BoxLayout.X_AXIS));
+    categoryBadge.setFont(new Font("Arial", Font.BOLD, 11));
     categoryBadge.setForeground(FAU_NAVY);
     categoryBadge.setOpaque(true);
     categoryBadge.setBackground(new Color(225, 239, 254));
-    categoryBadge.setBorder(BorderFactory.createEmptyBorder(4, 10, 4, 10));
+    categoryBadge.setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory.createLineBorder(new Color(200, 230, 255), 1),
+        BorderFactory.createEmptyBorder(4, 10, 4, 10)));
+    right.add(categoryBadge);
+
+    deleteButton.setFont(new Font("Arial", Font.PLAIN, 12));
+    deleteButton.setForeground(FAU_RED);
+    deleteButton.setBackground(CARD_BACKGROUND);
+    deleteButton.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
+    deleteButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    deleteButton.addActionListener(e -> handleDelete());
+    right.add(Box.createHorizontalStrut(8));
+    right.add(deleteButton);
 
     header.add(left, BorderLayout.WEST);
-    header.add(categoryBadge, BorderLayout.EAST);
-
+    header.add(right, BorderLayout.EAST);
     return header;
   }
 
-  private JPanel createContent() {
-    JPanel content = new JPanel();
-    content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-    content.setOpaque(false);
-    content.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+  private JPanel createBody() {
+    JPanel bodyPanel = new JPanel();
+    bodyPanel.setOpaque(false);
+    bodyPanel.setLayout(new BoxLayout(bodyPanel, BoxLayout.Y_AXIS));
 
-    titleLabel = new JLabel("Title");
     titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
     titleLabel.setForeground(FAU_NAVY);
     titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-    bodyArea = new JTextArea("Body content");
-    bodyArea.setFont(new Font("Arial", Font.PLAIN, 13));
-    bodyArea.setForeground(new Color(60, 60, 60));
+    bodyArea.setFont(new Font("Arial", Font.PLAIN, 14));
+    bodyArea.setForeground(TEXT_PRIMARY);
     bodyArea.setLineWrap(true);
     bodyArea.setWrapStyleWord(true);
     bodyArea.setEditable(false);
@@ -124,128 +149,131 @@ public class PostCard extends JPanel {
     bodyArea.setBorder(null);
     bodyArea.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-    content.add(titleLabel);
-    content.add(Box.createVerticalStrut(8));
-    content.add(bodyArea);
-
-    return content;
+    bodyPanel.add(titleLabel);
+    bodyPanel.add(Box.createVerticalStrut(8));
+    bodyPanel.add(bodyArea);
+    return bodyPanel;
   }
 
   private JPanel createFooter() {
-    JPanel footer = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    JPanel footer = new JPanel();
     footer.setOpaque(false);
+    footer.setLayout(new BoxLayout(footer, BoxLayout.X_AXIS));
 
-    likeButton = new JButton("0");
-    likeButton.setIcon(LIKE_ICON);
-    likeButton.setHorizontalTextPosition(SwingConstants.RIGHT);
-    likeButton.setIconTextGap(6);
     likeButton.setFont(new Font("Arial", Font.PLAIN, 13));
-    likeButton.setForeground(Color.GRAY);
-    likeButton.setBackground(CARD_BG);
-    likeButton.setBorderPainted(false);
-    likeButton.setFocusPainted(false);
+    likeButton.setForeground(TEXT_SECONDARY);
+    likeButton.setBackground(CARD_BACKGROUND);
+    likeButton.setBorder(BorderFactory.createEmptyBorder(6, 10, 6, 10));
     likeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-    likeButton.addActionListener(e -> {
-      controller.toggleLike(post);
-      refreshLikeButton();
-    });
-
-    likeButton.addMouseListener(new java.awt.event.MouseAdapter() {
-      public void mouseEntered(java.awt.event.MouseEvent e) {
-        likeButton.setForeground(FAU_RED);
-      }
-
-      public void mouseExited(java.awt.event.MouseEvent e) {
-        refreshLikeButton();
-      }
-    });
-
-    deleteButton = new JButton("Delete");
-    deleteButton.setIcon(DELETE_ICON);
-    deleteButton.setHorizontalTextPosition(SwingConstants.RIGHT);
-    deleteButton.setIconTextGap(6);
-    deleteButton.setFont(new Font("Arial", Font.PLAIN, 12));
-    deleteButton.setForeground(FAU_RED);
-    deleteButton.setBackground(CARD_BG);
-    deleteButton.setBorderPainted(true);
-    deleteButton.setBorder(BorderFactory.createCompoundBorder(
-        BorderFactory.createLineBorder(FAU_RED, 1),
-        BorderFactory.createEmptyBorder(3, 8, 3, 8)));
-    deleteButton.setFocusPainted(false);
-    deleteButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-    deleteButton.addActionListener(e -> handleDelete());
-
-    deleteButton.addMouseListener(new java.awt.event.MouseAdapter() {
-      public void mouseEntered(java.awt.event.MouseEvent e) {
-        deleteButton.setBackground(new Color(255, 240, 240));
-      }
-
-      public void mouseExited(java.awt.event.MouseEvent e) {
-        deleteButton.setBackground(CARD_BG);
-      }
-    });
+    likeButton.addActionListener(e -> handleLike());
 
     footer.add(likeButton);
-    footer.add(Box.createHorizontalStrut(10));
-    footer.add(deleteButton);
-
     return footer;
   }
 
+  private JLabel createAvatarLabel() {
+    JLabel avatar = new JLabel("?", JLabel.CENTER) {
+      @Override
+      protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setColor(getBackground());
+        g2.fillOval(0, 0, getWidth(), getHeight());
+        g2.setColor(getForeground());
+        g2.setFont(getFont());
+        FontMetrics fm = g2.getFontMetrics();
+        int x = (getWidth() - fm.stringWidth(getText())) / 2;
+        int y = ((getHeight() - fm.getHeight()) / 2) + fm.getAscent();
+        g2.drawString(getText(), x, y);
+        g2.dispose();
+      }
+    };
+    avatar.setPreferredSize(new java.awt.Dimension(36, 36));
+    avatar.setFont(new Font("Arial", Font.BOLD, 14));
+    avatar.setForeground(Color.WHITE);
+    avatar.setBackground(FAU_RED);
+    avatar.setOpaque(false);
+    avatar.setName("avatar");
+    return avatar;
+  }
+
+  public void bind(Post post) {
+    this.post = post;
+    titleLabel.setText(post.title());
+    bodyArea.setText(post.body());
+
+    String authorText = "@" + (post.author() == null ? "guest" : post.author());
+    authorLabel.setText(authorText);
+    authorLabel.setToolTipText(authorText);
+    avatarLabel.setText(extractInitial(post.author()));
+
+    timestampLabel.setText(formatTimestamp(post.createdAt()));
+    categoryBadge.setText(formatCategory(post.category().name()));
+
+    updateVisibility();
+    updateLikeButton();
+  }
+
+  private void updateVisibility() {
+    boolean canDelete = controller.canModifyPost(post);
+    deleteButton.setVisible(canDelete);
+  }
+
+  private void updateLikeButton() {
+    boolean liked = session.isAuthenticated() && post.isLikedBy(session.user().username());
+    String heart = liked ? "♥" : "♡";
+    likeButton.setText(heart + " " + post.likeCount());
+    likeButton.setForeground(liked ? FAU_NAVY : TEXT_SECONDARY);
+  }
+
+  private void handleLike() {
+    controller.toggleLike(post);
+    SwingUtilities.invokeLater(this::updateLikeButton);
+  }
+
   private void handleDelete() {
-    int confirm = JOptionPane.showConfirmDialog(
-        this,
-        "Are you sure you want to delete this post?\n\"" + post.title() + "\"",
+    int confirm = JOptionPane.showConfirmDialog(this,
+        "Are you sure you want to delete this post?",
         "Confirm Delete",
         JOptionPane.YES_NO_OPTION,
         JOptionPane.WARNING_MESSAGE);
-
     if (confirm == JOptionPane.YES_OPTION) {
       controller.delete(post);
     }
   }
 
-  private String formatTime(Instant time) {
-    if (time == null)
+  private String formatTimestamp(LocalDateTime createdAt) {
+    if (createdAt == null) {
       return "Unknown";
-    Duration dur = Duration.between(time, Instant.now());
-    long mins = dur.toMinutes();
-    long hours = dur.toHours();
-    long days = dur.toDays();
-
-    if (mins < 1)
-      return "Just now";
-    if (mins < 60)
-      return mins + "m ago";
-    if (hours < 24)
-      return hours + "h ago";
-    if (days < 7)
-      return days + "d ago";
-    return days / 7 + "w ago";
+    }
+    Duration duration = Duration.between(createdAt, LocalDateTime.now());
+    long minutes = duration.toMinutes();
+    long hours = duration.toHours();
+    long days = duration.toDays();
+    if (minutes < 1) return "Just now";
+    if (minutes < 60) return minutes + " minute" + (minutes > 1 ? "s" : "") + " ago";
+    if (hours < 24) return hours + " hour" + (hours > 1 ? "s" : "") + " ago";
+    if (days < 7) return days + " day" + (days > 1 ? "s" : "") + " ago";
+    return createdAt.format(DateTimeFormatter.ofPattern("MMM d, yyyy"));
   }
 
-  private String formatCategory(Category cat) {
-    if (cat == null)
-      return "General";
-    return switch (cat) {
-      case ANNOUNCEMENTS -> "Announcements";
-      case STUDY_GROUPS -> "Study Groups";
-      case EVENTS -> "Events";
-      case LOST_FOUND -> "Lost & Found";
-    };
+  private String extractInitial(String value) {
+    if (value == null || value.isBlank()) {
+      return "?";
+    }
+    return value.substring(0, 1).toUpperCase();
   }
 
-  private void refreshLikeButton() {
-    if (likeButton == null)
-      return;
-    likeButton.setText(post == null ? "0" : String.valueOf(post.likeCount()));
-    boolean liked = isLikedByCurrentUser();
-    likeButton.setIcon(liked ? LIKE_FILLED_ICON : LIKE_ICON);
-    likeButton.setForeground(liked ? FAU_RED : Color.GRAY);
-  }
-
-  private boolean isLikedByCurrentUser() {
-    return session.isAuthenticated() && post != null && session.user() != null
-        && post.isLikedBy(session.user().username());
+  private String formatCategory(String category) {
+    String[] words = category.replace("_", " ").split(" ");
+    StringBuilder result = new StringBuilder();
+    for (String word : words) {
+      if (!word.isEmpty()) {
+        result.append(word.substring(0, 1).toUpperCase())
+            .append(word.substring(1).toLowerCase())
+            .append(" ");
+      }
+    }
+    return result.toString().trim();
   }
 }

@@ -1,9 +1,10 @@
 package org.campusboard.sgs.filter;
 
-import org.campusboard.sgs.model.*;
-import org.campusboard.sgs.repo.UserRepository;
 import java.util.List;
 import java.util.stream.Stream;
+import org.campusboard.sgs.model.Post;
+import org.campusboard.sgs.model.UserType;
+import org.campusboard.sgs.repo.UserRepository;
 
 public class AuthorTypeFilter implements FilterStrategy {
   private final UserType userType;
@@ -16,10 +17,9 @@ public class AuthorTypeFilter implements FilterStrategy {
 
   @Override
   public Stream<Post> filter(List<Post> posts) {
-    return posts.stream().filter(p -> {
-      var user = userRepo.find(p.author());
-      return user.isPresent() && user.get().getUserType() == userType;
-    });
+    return posts.stream().filter(p -> userRepo.find(p.author())
+        .map(user -> user.getUserType() == userType)
+        .orElse(false));
   }
 
   @Override

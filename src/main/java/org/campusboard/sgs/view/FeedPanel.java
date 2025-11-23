@@ -1,13 +1,23 @@
 package org.campusboard.sgs.view;
 
-import org.campusboard.sgs.controller.*;
-import org.campusboard.sgs.model.*;
-import org.campusboard.sgs.util.*;
-import javax.swing.*;
-import java.awt.*;
-import java.util.*;
+import java.awt.BorderLayout;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
+import org.campusboard.sgs.controller.PostController;
+import org.campusboard.sgs.filter.SortByNew;
+import org.campusboard.sgs.model.Post;
+import org.campusboard.sgs.util.EventBus;
+import org.campusboard.sgs.util.Events;
+import org.campusboard.sgs.util.Session;
 
 /** Scrollable feed that avoids full rebuilds to stop jumping to top. */
 public class FeedPanel extends JPanel {
@@ -30,7 +40,7 @@ public class FeedPanel extends JPanel {
 
     debounce.setRepeats(false); // classic debounce
     bus.subscribe(Events.POSTS_REPLACED, e -> schedule());
-    bus.subscribe(Events.POST_UPDATED, e -> schedule());
+    bus.subscribe(Events.POST_UPDATED, e -> handlePostUpdated(e.data));
     bus.subscribe(Events.FILTER_CHANGED, e -> schedule());
     bus.subscribe(Events.SEARCH_CHANGED, e -> schedule());
     schedule();
@@ -41,6 +51,34 @@ public class FeedPanel extends JPanel {
       debounce.restart();
     else
       debounce.start();
+  }
+
+  private void handlePostUpdated(Object data) {
+    if (!(data instanceof UUID postId)) {
+      schedule();
+      return;
+    }
+    // If sort requires reordering (e.g., trending), fall back to a full refresh
+    if (!(controller.getSort() instanceof SortByNew)) {
+      schedule();
+      return;
+    }
+    // If the card is not present, rebuild the feed (likely due to filtering or new post)
+    if (!cards.containsKey(postId)) {
+      schedule();
+      return;
+    }
+    controller.findById(postId).ifPresentOrElse(updated -> {
+      // Ensure the post still passes the current filters/search
+      boolean stillVisible = controller.current().stream().anyMatch(p -> p.id().equals(postId));
+      if (!stillVisible) {
+        schedule();
+        return;
+      }
+      cards.get(postId).bind(updated);
+      content.revalidate();
+      content.repaint();
+    }, this::schedule);
   }
 
   private void doRefresh() {

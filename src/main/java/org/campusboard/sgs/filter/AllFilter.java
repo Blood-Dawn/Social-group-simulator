@@ -1,8 +1,8 @@
 package org.campusboard.sgs.filter;
 
-import org.campusboard.sgs.model.Post;
 import java.util.List;
 import java.util.stream.Stream;
+import org.campusboard.sgs.model.Post;
 
 public class AllFilter implements FilterStrategy {
   @Override

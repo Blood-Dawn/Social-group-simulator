@@ -1,27 +1,32 @@
 package org.campusboard.sgs.filter;
 
-import org.campusboard.sgs.model.*;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.Objects;
+import org.campusboard.sgs.model.Category;
+import org.campusboard.sgs.model.Post;
 
 public class CategoryFilter implements FilterStrategy {
-  private final Category category;
 
-  public CategoryFilter(Category category) {
-    this.category = category;
-  }
+    private final Category category;
 
-  @Override
-  public Stream<Post> filter(List<Post> posts) {
-    return posts.stream().filter(p -> p.category() == category);
-  }
+    public CategoryFilter(Category category) {
+        this.category = Objects.requireNonNull(category, "category must not be null");
+    }
 
-  @Override
-  public String getDescription() {
-    return category.name();
-  }
+    @Override
+    public java.util.stream.Stream<Post> filter(List<Post> posts) {
+        List<Post> filtered = new ArrayList<>();
+        for (Post p : posts) {
+            if (p.category() == category) {
+                filtered.add(p);
+            }
+        }
+        return filtered.stream();
+    }
 
-  public Category getCategory() {
-    return category;
-  }
+    @Override
+    public String getDescription() {
+        return category.name();
+    }
 }

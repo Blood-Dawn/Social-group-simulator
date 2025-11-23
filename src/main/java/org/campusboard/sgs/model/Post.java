@@ -1,81 +1,174 @@
 package org.campusboard.sgs.model;
 
-import java.time.Instant;
-import java.util.*;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
-public final class Post {
+/**
+ * Represents a post in the social group simulator.
+ * Maintains per-user likes to support toggle-like behavior.
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Post {
+  public static final String GUEST_AUTHOR_FALLBACK = "guest";
+
   private final UUID id;
   private String title;
   private String body;
   private Category category;
   private final String author;
-  private final Instant createdAt;
-  private Instant updatedAt;
+  private final LocalDateTime createdAt;
   private final Set<String> likedBy = new HashSet<>();
 
   public Post(UUID id, String title, String body, Category category, String author) {
+    this(id, title, body, category, author, null, null);
+  }
+
+  public Post(String title, String body, Category category, String author) {
+    this(null, title, body, category, author, null, null);
+  }
+
+  public Post(String title, String body, Category category, User author) {
+    this(null, title, body, category, author == null ? null : author.username(), null, null);
+  }
+
+  public Post(String title, String body, User author) {
+    this(null, title, body, Category.ANNOUNCEMENTS, author == null ? null : author.username(), null, null);
+  }
+
+  public Post(UUID id, String title, String body, Category category, String author, LocalDateTime createdAt,
+      Set<String> likedBy) {
+    this(id, title, body, category, author, createdAt, likedBy);
+  }
+
+  @JsonCreator
+  public Post(
+      @JsonProperty("id") UUID id,
+      @JsonProperty("title") String title,
+      @JsonProperty("body") String body,
+      @JsonProperty("category") Category category,
+      @JsonProperty("author") String author,
+      @JsonProperty("createdAt") LocalDateTime createdAt,
+      @JsonProperty("likedBy") Set<String> likedBy) {
+    this(id, title, body, category, author, createdAt, likedBy);
+  }
+
+  private Post(UUID id, String title, String body, Category category, String author,
+               LocalDateTime createdAt, Set<String> likedBy) {
     this.id = id == null ? UUID.randomUUID() : id;
-    this.title = Objects.requireNonNull(title, "title");
-    this.body = Objects.requireNonNull(body, "body");
-    this.category = Objects.requireNonNull(category, "category");
-    this.author = Objects.requireNonNull(author, "author");
-    this.createdAt = Instant.now();
-    this.updatedAt = createdAt;
-  }
-
-  public UUID id() { return id; }
-  public String title() { return title; }
-  public String body() { return body; }
-  public Category category() { return category; }
-  public String author() { return author; }
-  public Instant createdAt() { return createdAt; }
-  public Instant updatedAt() { return updatedAt; }
-  public int likeCount() { return likedBy.size(); }
-
-  public void setTitle(String title) {
-    this.title = Objects.requireNonNull(title, "title");
-    this.updatedAt = Instant.now();
-  }
-
-  public void setBody(String body) {
-    this.body = Objects.requireNonNull(body, "body");
-    this.updatedAt = Instant.now();
-  }
-
-  public void setCategory(Category category) {
-    this.category = Objects.requireNonNull(category, "category");
-    this.updatedAt = Instant.now();
-  }
-
-  public boolean toggleLike(String userId) {
-    Objects.requireNonNull(userId, "userId");
-    if (likedBy.remove(userId)) {
-      updatedAt = Instant.now();
-      return false;
+    this.title = requireNonBlank(title, "title");
+    this.body = requireNonBlank(body, "body");
+    this.category = Objects.requireNonNullElse(category, Category.ANNOUNCEMENTS);
+    String normalizedAuthor = (author == null || author.isBlank()) ? GUEST_AUTHOR_FALLBACK : author.trim();
+    this.author = normalizedAuthor;
+    this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
+    if (likedBy != null) {
+      this.likedBy.addAll(likedBy);
     }
-    likedBy.add(userId);
-    updatedAt = Instant.now();
-    return true;
+  }
+
+  public UUID id() {
+    return id;
+  }
+
+  public String title() {
+    return title;
+  }
+
+  public String body() {
+    return body;
+  }
+
+  public Category category() {
+    return category;
+  }
+
+  public String author() {
+    return author;
+  }
+
+  public LocalDateTime createdAt() {
+    return createdAt;
+  }
+
+  public int likeCount() {
+    return likedBy.size();
   }
 
   public boolean isLikedBy(String userId) {
+    if (userId == null || userId.isBlank()) {
+      return false;
+    }
     return likedBy.contains(userId);
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Post)) return false;
-    return id.equals(((Post) o).id);
+  /**
+   * Toggles like for the given user.
+   *
+   * @return true if the post is liked after the toggle; false if unliked
+   */
+  public boolean toggleLike(String userId) {
+    if (userId == null || userId.isBlank()) {
+      return false;
+    }
+    if (likedBy.contains(userId)) {
+      likedBy.remove(userId);
+      return false;
+    }
+    likedBy.add(userId);
+    return true;
   }
 
-  @Override
-  public int hashCode() {
-    return id.hashCode();
+  public void setTitle(String title) {
+    this.title = requireNonBlank(title, "title");
   }
 
-  @Override
-  public String toString() {
-    return "Post{id=" + id + ", title='" + title + "', author='" + author + "'}";
+  public void setBody(String body) {
+    this.body = requireNonBlank(body, "body");
+  }
+
+  public void setCategory(Category category) {
+    this.category = Objects.requireNonNull(category, "category must not be null");
+  }
+
+  // Legacy-style getters for UI code that still calls bean-style accessors.
+  public String getTitle() {
+    return title();
+  }
+
+  public String getBody() {
+    return body();
+  }
+
+  public UUID getId() {
+    return id();
+  }
+
+  public Category getCategory() {
+    return category();
+  }
+
+  public LocalDateTime getCreatedAt() {
+    return createdAt();
+  }
+
+  public String getAuthor() {
+    return author();
+  }
+
+  public int getLikes() {
+    return likeCount();
+  }
+
+  private String requireNonBlank(String value, String fieldName) {
+    if (value == null || value.isBlank()) {
+      throw new IllegalArgumentException(fieldName + " must not be blank");
+    }
+    return value.trim();
   }
 }

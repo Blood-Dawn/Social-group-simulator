@@ -108,7 +108,7 @@ public class MainWindow extends JFrame {
 
     var top = new TopBar(postController, authController, bus, session);
     var feed = new FeedPanel(postController, session, bus);
-    var sidebar = new SidebarPanel(postController, bus, session);
+    var sidebar = new SidebarPanel(postController, bus, session, userRepo);
 
     var split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sidebar, feed);
     split.setOneTouchExpandable(true);
